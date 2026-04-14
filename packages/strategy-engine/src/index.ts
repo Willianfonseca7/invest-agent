@@ -2,14 +2,16 @@ import { calculateEMA } from "./indicators/ema";
 import { calculateRSI } from "./indicators/rsi";
 import {
   analyzeMultiTimeframeMarket,
+  decideMarketAction
+} from "./market-analysis";
+import type {
   Candle,
   MarketAnalysis,
   MarketAnalysisInput,
   MarketAction,
   MarketTrend,
-  StructuredReason,
-  decideMarketAction
-} from "./market-analysis";
+  StructuredReason
+} from "./market-analysis.types";
 
 export type {
   Candle,

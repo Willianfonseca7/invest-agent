@@ -89,9 +89,43 @@ select {
   align-items: flex-end;
 }
 
+.hero-panel__badges {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
 .hero-panel__timestamp {
   color: #8aa1c2;
   font-size: 0.92rem;
+}
+
+.symbol-select,
+.refresh-button {
+  border: 1px solid rgba(125, 211, 252, 0.16);
+  border-radius: 999px;
+  background: rgba(7, 17, 29, 0.9);
+  color: #eff6ff;
+  padding: 10px 16px;
+  font-size: 0.92rem;
+}
+
+.symbol-select {
+  min-width: 180px;
+}
+
+.refresh-button {
+  cursor: pointer;
+  transition:
+    border-color 160ms ease,
+    background 160ms ease;
+}
+
+.symbol-select:focus,
+.refresh-button:hover {
+  border-color: rgba(125, 211, 252, 0.36);
+  background: rgba(12, 26, 43, 0.96);
 }
 
 .eyebrow {

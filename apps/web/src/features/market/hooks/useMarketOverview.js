@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { fetchMarketOverview } from "@/services/marketApi";
 
 const REFRESH_INTERVAL_IN_MS = 30_000;
@@ -8,11 +8,10 @@ export function useMarketOverview(symbol = "BTCUSDT") {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState("");
+  const [lastUpdatedAt, setLastUpdatedAt] = useState(null);
 
-  useEffect(() => {
-    let active = true;
-
-    async function load(isBackgroundRefresh = false) {
+  const loadMarket = useCallback(
+    async (isBackgroundRefresh = false, options = {}) => {
       try {
         setError("");
 
@@ -22,43 +21,56 @@ export function useMarketOverview(symbol = "BTCUSDT") {
           setLoading(true);
         }
 
-        const nextMarket = await fetchMarketOverview(symbol);
-
-        if (active) {
-          setMarket(nextMarket);
-        }
+        const nextMarket = await fetchMarketOverview(symbol, {
+          signal: options.signal
+        });
+        setMarket(nextMarket);
+        setLastUpdatedAt(new Date());
       } catch (requestError) {
-        if (active) {
-          setError(
-            requestError instanceof Error
-              ? requestError.message
-              : "Erro ao carregar mercado."
-          );
+        if (
+          requestError instanceof Error &&
+          requestError.message === "REQUEST_CANCELED"
+        ) {
+          return;
         }
+
+        setError(
+          requestError instanceof Error
+            ? requestError.message
+            : "Erro ao carregar mercado."
+        );
       } finally {
-        if (active) {
-          setLoading(false);
+        if (isBackgroundRefresh) {
           setRefreshing(false);
+        } else {
+          setLoading(false);
         }
       }
-    }
+    },
+    [symbol]
+  );
 
-    load(false);
+  useEffect(() => {
+    const controller = new AbortController();
 
-    const intervalId = window.setInterval(() => {
-      load(true);
+    loadMarket(false, { signal: controller.signal });
+
+    const interval = window.setInterval(() => {
+      loadMarket(true, { signal: controller.signal });
     }, REFRESH_INTERVAL_IN_MS);
 
     return () => {
-      active = false;
-      window.clearInterval(intervalId);
+      controller.abort();
+      window.clearInterval(interval);
     };
-  }, [symbol]);
+  }, [loadMarket]);
 
   return {
     market,
     loading,
     refreshing,
     error,
+    lastUpdatedAt,
+    refetch: () => loadMarket(true),
   };
 }

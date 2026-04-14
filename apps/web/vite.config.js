@@ -5,6 +5,8 @@ import react from "@vitejs/plugin-react";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+const WEB_PORT = 4173;
+const API_PROXY_TARGET = "http://localhost:3001";
 
 export default defineConfig({
   root: __dirname,
@@ -15,8 +17,16 @@ export default defineConfig({
     },
   },
   server: {
+    // Prefer 4173 for local development, but let Vite pick the next free port
+    // instead of crashing when another frontend instance is already running.
+    port: WEB_PORT,
+    strictPort: false,
     proxy: {
-      "/api": "http://localhost:3001",
+      "/api": API_PROXY_TARGET,
     },
+  },
+  preview: {
+    port: WEB_PORT,
+    strictPort: false,
   },
 });

@@ -56,6 +56,8 @@ npm run dev:web
 ```
 
 The Vite app proxies `/api` to `http://localhost:3001`.
+The frontend prefers port `4173`. If `4173` is already in use, Vite automatically
+falls back to the next free port instead of crashing.
 
 Useful commands:
 
