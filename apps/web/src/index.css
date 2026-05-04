@@ -32,6 +32,59 @@ select {
   font: inherit;
 }
 
+.navbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  justify-content: flex-end;
+  padding: 12px 20px;
+  background: rgba(5, 9, 20, 0.88);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+}
+
+.navbar__inner {
+  width: min(1120px, 100%);
+  margin: 0 auto;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.lang-switcher {
+  display: flex;
+  gap: 4px;
+  background: rgba(9, 16, 28, 0.8);
+  border: 1px solid rgba(148, 163, 184, 0.14);
+  border-radius: 999px;
+  padding: 4px;
+}
+
+.lang-btn {
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: none;
+  background: transparent;
+  color: #7f93b2;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  transition:
+    color 140ms ease,
+    background 140ms ease;
+}
+
+.lang-btn:hover {
+  color: #ecf3ff;
+  background: rgba(148, 163, 184, 0.1);
+}
+
+.lang-btn--active {
+  background: rgba(125, 211, 252, 0.12);
+  color: #7dd3fc;
+}
+
 .app-shell {
   min-height: 100vh;
   padding: 40px 20px 56px;

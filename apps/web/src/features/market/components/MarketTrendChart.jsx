@@ -7,6 +7,7 @@ import {
   CartesianGrid,
   Tooltip
 } from "recharts";
+import { useTranslation } from "react-i18next";
 import { SectionCard } from "@/components/ui/SectionCard";
 import { formatCurrency } from "@/utils/format";
 
@@ -44,6 +45,8 @@ function buildChartData(closes1h) {
 }
 
 export function MarketTrendChart({ closes1h = [] }) {
+  const { t } = useTranslation();
+
   if (!Array.isArray(closes1h) || closes1h.length === 0) {
     return null;
   }
@@ -52,8 +55,8 @@ export function MarketTrendChart({ closes1h = [] }) {
 
   return (
     <SectionCard
-      title="Movimentação de preços + EMAs (1h)"
-      description="Preço, EMA50 e EMA200 nos candles mais recentes de 1h."
+      title={t("charts.trendTitle")}
+      description={t("charts.trendDesc")}
     >
       <div style={{ width: "100%", height: 360 }}>
         <ResponsiveContainer>
@@ -67,7 +70,7 @@ export function MarketTrendChart({ closes1h = [] }) {
             />
             <Tooltip
               formatter={(value, name) => [formatCurrency(value), name]}
-              labelFormatter={(label) => `Candle ${label}`}
+              labelFormatter={(label) => t("charts.candle", { number: label })}
             />
             <Line
               type="monotone"
@@ -75,7 +78,7 @@ export function MarketTrendChart({ closes1h = [] }) {
               stroke="#f8fafc"
               strokeWidth={2}
               dot={false}
-              name="Preço"
+              name={t("charts.price")}
             />
             <Line
               type="monotone"

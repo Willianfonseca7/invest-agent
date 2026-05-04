@@ -8,6 +8,7 @@ import {
   Tooltip,
   ReferenceLine
 } from "recharts";
+import { useTranslation } from "react-i18next";
 import { SectionCard } from "@/components/ui/SectionCard";
 import { formatNumber } from "@/utils/format";
 
@@ -78,6 +79,8 @@ function buildRsiChartData(closes5m, closes1h) {
 }
 
 export function MarketRsiChart({ closes5m = [], closes1h = [] }) {
+  const { t } = useTranslation();
+
   if (
     !Array.isArray(closes5m) ||
     !Array.isArray(closes1h) ||
@@ -91,8 +94,8 @@ export function MarketRsiChart({ closes5m = [], closes1h = [] }) {
 
   return (
     <SectionCard
-      title="RSI Momentum"
-      description="RSI 5m e RSI 1h com zonas de sobrecompra e sobrevenda."
+      title={t("charts.rsiTitle")}
+      description={t("charts.rsiDesc")}
     >
       <div style={{ width: "100%", height: 300 }}>
         <ResponsiveContainer>
@@ -106,7 +109,7 @@ export function MarketRsiChart({ closes5m = [], closes1h = [] }) {
             />
             <Tooltip
               formatter={(value, name) => [formatNumber(value), name]}
-              labelFormatter={(label) => `Candle ${label}`}
+              labelFormatter={(label) => t("charts.candle", { number: label })}
             />
 
             <ReferenceLine y={70} stroke="#ef4444" strokeDasharray="4 4" />

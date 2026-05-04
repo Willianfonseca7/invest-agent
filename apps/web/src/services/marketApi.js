@@ -1,4 +1,5 @@
 import axios from "axios";
+import i18n from "@/i18n";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || "/api";
 
@@ -20,13 +21,13 @@ function getErrorMessage(error) {
       error.response?.data?.message ||
       error.response?.data?.error ||
       error.message ||
-      "Erro ao buscar dados do mercado."
+      i18n.t("errors.fetchMarket")
     );
   }
 
   return error instanceof Error
     ? error.message
-    : "Erro ao buscar dados do mercado.";
+    : i18n.t("errors.fetchMarket");
 }
 
 function normalizeMarketOverview(payload, symbol) {
@@ -36,7 +37,7 @@ function normalizeMarketOverview(payload, symbol) {
       action: "HOLD",
       reason: {
         code: "INSUFFICIENT_INDICATOR_DATA",
-        summary: "Payload de mercado inválido.",
+        summary: i18n.t("errors.invalidPayload"),
         details: [],
         metrics: {}
       }
@@ -57,7 +58,7 @@ function normalizeMarketOverview(payload, symbol) {
         ? payload.reason
         : {
             code: payload.reasonCode || payload.code || "INSUFFICIENT_INDICATOR_DATA",
-            summary: payload.reason || payload.decisionReason || "Sem justificativa.",
+            summary: payload.reason || payload.decisionReason || i18n.t("errors.noReason"),
             details: [],
             metrics: {}
           }

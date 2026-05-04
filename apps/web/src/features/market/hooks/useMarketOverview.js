@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { fetchMarketOverview } from "@/services/marketApi";
+import i18n from "@/i18n";
 
 const REFRESH_INTERVAL_IN_MS = 30_000;
 
@@ -37,7 +38,7 @@ export function useMarketOverview(symbol = "BTCUSDT") {
         setError(
           requestError instanceof Error
             ? requestError.message
-            : "Erro ao carregar mercado."
+            : i18n.t("errors.loadMarket")
         );
       } finally {
         if (isBackgroundRefresh) {

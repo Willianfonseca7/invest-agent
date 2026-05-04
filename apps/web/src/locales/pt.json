@@ -1,0 +1,66 @@
+{
+  "dashboard": {
+    "eyebrow": "Trading Dashboard",
+    "loading": {
+      "title": "Carregando mercado",
+      "description": "Buscando snapshot consolidado do backend."
+    },
+    "error": {
+      "title": "Falha ao carregar o mercado"
+    },
+    "hero": {
+      "eyebrow": "Painel de Negociacao",
+      "title": "Visao geral do mercado",
+      "selectedAsset": "Ativo selecionado:",
+      "lastUpdated": "Ultima atualizacao:",
+      "refreshing": "Atualizando...",
+      "refresh": "Atualizar agora"
+    },
+    "metrics": {
+      "price": "Preco do {{asset}}",
+      "confidence": "Confidence",
+      "trendStrength": "Trend Strength",
+      "trendStrengthHint": "Combina distancia EMA50/EMA200 e inclinacao recente da EMA50",
+      "priceVsEma50": "Price vs EMA50",
+      "priceVsEma50Hint": "Distancia do preco atual em relacao a EMA50",
+      "volume": "Volume",
+      "avg": "Avg {{value}}",
+      "recentVolumeRatio": "Recent Volume Ratio",
+      "recentVolumeRatioHint": "Volume atual comparado a media dos ultimos candles",
+      "volumeSpike": "Volume Spike",
+      "yes": "SIM",
+      "no": "NAO"
+    },
+    "sections": {
+      "indicators": "Indicadores",
+      "indicatorsDesc": "Indicadores calculados no backend e retornados prontos para a UI.",
+      "decisionContext": "Contexto de Decisao",
+      "decisionContextDesc": "Leitura operacional usada pelo bot para BUY, SELL ou HOLD."
+    },
+    "context": {
+      "action": "Acao",
+      "trend4h": "Tendencia 4H",
+      "reason": "Razao",
+      "reasonCode": "Codigo de Razao",
+      "whyHold": "Por que HOLD/Entrada"
+    }
+  },
+  "charts": {
+    "rsiTitle": "RSI Momentum",
+    "rsiDesc": "RSI 5m e RSI 1h com zonas de sobrecompra e sobrevenda.",
+    "trendTitle": "Movimentacao de precos + EMAs (1h)",
+    "trendDesc": "Preco, EMA50 e EMA200 nos candles mais recentes de 1h.",
+    "candle": "Candle {{number}}",
+    "price": "Preco"
+  },
+  "errors": {
+    "loadMarket": "Erro ao carregar mercado.",
+    "fetchMarket": "Erro ao buscar dados do mercado.",
+    "invalidPayload": "Payload de mercado invalido.",
+    "noReason": "Sem justificativa."
+  },
+  "common": {
+    "asset": "ATIVO",
+    "locale": "pt-BR"
+  }
+}

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useMarketOverview } from "../hooks/useMarketOverview";
 import { formatCurrency, formatNumber, formatPercent } from "@/utils/format";
 import { MetricCard } from "@/components/ui/MetricCard";
@@ -16,7 +17,7 @@ const SYMBOL_OPTIONS = [
 
 const STORAGE_KEY = "invest-agent:selected-symbol";
 
-function formatDateTime(value) {
+function formatDateTime(value, locale) {
   if (!value) {
     return "—";
   }
@@ -27,20 +28,20 @@ function formatDateTime(value) {
     return "—";
   }
 
-  return new Intl.DateTimeFormat("pt-BR", {
+  return new Intl.DateTimeFormat(locale, {
     dateStyle: "short",
     timeStyle: "medium"
   }).format(date);
 }
 
-function getAssetLabel(symbol) {
+function getAssetLabel(symbol, fallback) {
   const normalizedSymbol = String(symbol || "").toUpperCase();
 
   if (normalizedSymbol.endsWith("USDT")) {
     return normalizedSymbol.replace(/USDT$/, "");
   }
 
-  return normalizedSymbol || "ATIVO";
+  return normalizedSymbol || fallback;
 }
 
 function getActionTone(action) {
@@ -68,6 +69,8 @@ function getTrendTone(trend) {
 }
 
 export function MarketDashboard() {
+  const { t } = useTranslation();
+
   const [symbol, setSymbol] = useState(() => {
     if (typeof window === "undefined") {
       return "BTCUSDT";
@@ -86,14 +89,18 @@ export function MarketDashboard() {
   const selectedSymbolLabel = useMemo(() => {
     return SYMBOL_OPTIONS.find((option) => option.value === symbol)?.label || symbol;
   }, [symbol]);
-  const selectedAssetLabel = useMemo(() => getAssetLabel(symbol), [symbol]);
+
+  const selectedAssetLabel = useMemo(
+    () => getAssetLabel(symbol, t("common.asset")),
+    [symbol, t]
+  );
 
   if (loading && !market) {
     return (
       <section className="feedback-panel">
-        <span className="eyebrow">Trading Dashboard</span>
-        <h1>Carregando mercado</h1>
-        <p>Buscando snapshot consolidado do backend.</p>
+        <span className="eyebrow">{t("dashboard.eyebrow")}</span>
+        <h1>{t("dashboard.loading.title")}</h1>
+        <p>{t("dashboard.loading.description")}</p>
       </section>
     );
   }
@@ -101,8 +108,8 @@ export function MarketDashboard() {
   if (error && !market) {
     return (
       <section className="feedback-panel">
-        <span className="eyebrow">Trading Dashboard</span>
-        <h1>Falha ao carregar o mercado</h1>
+        <span className="eyebrow">{t("dashboard.eyebrow")}</span>
+        <h1>{t("dashboard.error.title")}</h1>
         <p>{error}</p>
       </section>
     );
@@ -115,18 +122,19 @@ export function MarketDashboard() {
   const actionTone = getActionTone(market.action);
   const trendTone = getTrendTone(market.trend4H);
   const volumeSpikeTone = market.reason?.metrics?.hasVolumeSpike ? "buy" : "neutral";
+  const locale = t("common.locale");
 
   return (
     <div className="dashboard">
       <section className="hero-panel">
         <div>
-          <span className="eyebrow">Painel de Negociação</span>
-          <h1>Visão geral do mercado</h1>
+          <span className="eyebrow">{t("dashboard.hero.eyebrow")}</span>
+          <h1>{t("dashboard.hero.title")}</h1>
           <p>
-            Ativo selecionado: <strong>{selectedSymbolLabel}</strong>
+            {t("dashboard.hero.selectedAsset")} <strong>{selectedSymbolLabel}</strong>
           </p>
           <p>
-            Última atualização: {formatDateTime(lastUpdatedAt)}
+            {t("dashboard.hero.lastUpdated")} {formatDateTime(lastUpdatedAt, locale)}
           </p>
         </div>
 
@@ -149,7 +157,7 @@ export function MarketDashboard() {
           </div>
 
           <button type="button" onClick={refetch} className="refresh-button">
-            {refreshing ? "Atualizando..." : "Atualizar agora"}
+            {refreshing ? t("dashboard.hero.refreshing") : t("dashboard.hero.refresh")}
           </button>
         </div>
       </section>
@@ -162,51 +170,55 @@ export function MarketDashboard() {
 
       <div className="metric-grid">
         <MetricCard
-          label={`Preço do ${selectedAssetLabel}`}
+          label={t("dashboard.metrics.price", { asset: selectedAssetLabel })}
           value={formatCurrency(market.price)}
         />
 
         <MetricCard
-          label="Confidence"
+          label={t("dashboard.metrics.confidence")}
           value={formatPercent(market.confidence)}
           tone={actionTone}
         />
 
         <MetricCard
-          label="Trend Strength"
+          label={t("dashboard.metrics.trendStrength")}
           value={formatPercent(market.trendStrength)}
-          hint="Combina distância EMA50/EMA200 e inclinação recente da EMA50"
+          hint={t("dashboard.metrics.trendStrengthHint")}
         />
 
         <MetricCard
-          label="Price vs EMA50"
+          label={t("dashboard.metrics.priceVsEma50")}
           value={formatPercent(market.reason?.metrics?.priceDistanceToEma50)}
-          hint="Distância do preço atual em relação à EMA50"
+          hint={t("dashboard.metrics.priceVsEma50Hint")}
         />
 
         <MetricCard
-          label="Volume"
+          label={t("dashboard.metrics.volume")}
           value={formatNumber(market.volume)}
-          hint={`Avg ${formatNumber(market.avgVolume)}`}
+          hint={t("dashboard.metrics.avg", { value: formatNumber(market.avgVolume) })}
         />
 
         <MetricCard
-          label="Recent Volume Ratio"
+          label={t("dashboard.metrics.recentVolumeRatio")}
           value={formatNumber(market.reason?.metrics?.recentVolumeRatio)}
-          hint="Volume atual comparado à média dos últimos candles"
+          hint={t("dashboard.metrics.recentVolumeRatioHint")}
         />
 
         <MetricCard
-          label="Volume Spike"
-          value={market.reason?.metrics?.hasVolumeSpike ? "YES" : "NO"}
+          label={t("dashboard.metrics.volumeSpike")}
+          value={
+            market.reason?.metrics?.hasVolumeSpike
+              ? t("dashboard.metrics.yes")
+              : t("dashboard.metrics.no")
+          }
           tone={volumeSpikeTone}
         />
       </div>
 
       <div className="details-grid">
         <SectionCard
-          title="Indicators"
-          description="Indicadores calculados no backend e retornados prontos para a UI."
+          title={t("dashboard.sections.indicators")}
+          description={t("dashboard.sections.indicatorsDesc")}
         >
           <div className="metric-grid metric-grid--compact">
             <MetricCard label="RSI 5m" value={formatNumber(market.rsi5m)} />
@@ -220,32 +232,32 @@ export function MarketDashboard() {
         </SectionCard>
 
         <SectionCard
-          title="Decision Context"
-          description="Leitura operacional usada pelo bot para BUY, SELL ou HOLD."
+          title={t("dashboard.sections.decisionContext")}
+          description={t("dashboard.sections.decisionContextDesc")}
         >
           <div className="context-list">
             <div className="context-row">
-              <span>Action</span>
+              <span>{t("dashboard.context.action")}</span>
               <StatusBadge tone={actionTone}>{market.action}</StatusBadge>
             </div>
 
             <div className="context-row">
-              <span>Trend 4H</span>
+              <span>{t("dashboard.context.trend4h")}</span>
               <StatusBadge tone={trendTone}>{market.trend4H}</StatusBadge>
             </div>
 
             <div className="context-row">
-              <span>Reason</span>
+              <span>{t("dashboard.context.reason")}</span>
               <p>{market.reason?.summary || "—"}</p>
             </div>
 
             <div className="context-row">
-              <span>Reason Code</span>
+              <span>{t("dashboard.context.reasonCode")}</span>
               <p>{market.reason?.code || "—"}</p>
             </div>
 
             <div className="context-row">
-              <span>Why HOLD/Entry</span>
+              <span>{t("dashboard.context.whyHold")}</span>
               <p>{market.reason?.details?.join(" ") || "—"}</p>
             </div>
           </div>

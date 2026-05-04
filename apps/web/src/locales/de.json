@@ -1,0 +1,66 @@
+{
+  "dashboard": {
+    "eyebrow": "Trading Dashboard",
+    "loading": {
+      "title": "Markt wird geladen",
+      "description": "Konsolidierter Snapshot wird vom Backend abgerufen."
+    },
+    "error": {
+      "title": "Markt konnte nicht geladen werden"
+    },
+    "hero": {
+      "eyebrow": "Handelspanel",
+      "title": "Marktübersicht",
+      "selectedAsset": "Ausgewähltes Asset:",
+      "lastUpdated": "Letzte Aktualisierung:",
+      "refreshing": "Aktualisierung...",
+      "refresh": "Jetzt aktualisieren"
+    },
+    "metrics": {
+      "price": "Preis von {{asset}}",
+      "confidence": "Confidence",
+      "trendStrength": "Trend Strength",
+      "trendStrengthHint": "Kombiniert EMA50/EMA200-Abstand und jüngste EMA50-Neigung",
+      "priceVsEma50": "Price vs EMA50",
+      "priceVsEma50Hint": "Abstand des aktuellen Preises zur EMA50",
+      "volume": "Volume",
+      "avg": "Avg {{value}}",
+      "recentVolumeRatio": "Recent Volume Ratio",
+      "recentVolumeRatioHint": "Aktuelles Volumen im Vergleich zum Durchschnitt der letzten Candles",
+      "volumeSpike": "Volume Spike",
+      "yes": "JA",
+      "no": "NEIN"
+    },
+    "sections": {
+      "indicators": "Indicators",
+      "indicatorsDesc": "Im Backend berechnete Indikatoren, fertig für die UI.",
+      "decisionContext": "Decision Context",
+      "decisionContextDesc": "Operativer Lesewert des Bots für BUY, SELL oder HOLD."
+    },
+    "context": {
+      "action": "Action",
+      "trend4h": "Trend 4H",
+      "reason": "Reason",
+      "reasonCode": "Reason Code",
+      "whyHold": "Why HOLD/Entry"
+    }
+  },
+  "charts": {
+    "rsiTitle": "RSI Momentum",
+    "rsiDesc": "RSI 5m und RSI 1h mit Überkauf- und Überverkaufszonen.",
+    "trendTitle": "Preisbewegung + EMAs (1h)",
+    "trendDesc": "Preis, EMA50 und EMA200 auf den jüngsten 1h-Candles.",
+    "candle": "Candle {{number}}",
+    "price": "Preis"
+  },
+  "errors": {
+    "loadMarket": "Fehler beim Laden des Marktes.",
+    "fetchMarket": "Fehler beim Abrufen der Marktdaten.",
+    "invalidPayload": "Ungültiger Markt-Payload.",
+    "noReason": "Keine Begründung."
+  },
+  "common": {
+    "asset": "ASSET",
+    "locale": "de-DE"
+  }
+}

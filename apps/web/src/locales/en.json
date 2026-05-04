@@ -1,0 +1,66 @@
+{
+  "dashboard": {
+    "eyebrow": "Trading Dashboard",
+    "loading": {
+      "title": "Loading market",
+      "description": "Fetching consolidated snapshot from backend."
+    },
+    "error": {
+      "title": "Failed to load market"
+    },
+    "hero": {
+      "eyebrow": "Trading Panel",
+      "title": "Market overview",
+      "selectedAsset": "Selected asset:",
+      "lastUpdated": "Last updated:",
+      "refreshing": "Updating...",
+      "refresh": "Refresh now"
+    },
+    "metrics": {
+      "price": "{{asset}} Price",
+      "confidence": "Confidence",
+      "trendStrength": "Trend Strength",
+      "trendStrengthHint": "Combines EMA50/EMA200 distance and recent EMA50 slope",
+      "priceVsEma50": "Price vs EMA50",
+      "priceVsEma50Hint": "Distance of current price relative to EMA50",
+      "volume": "Volume",
+      "avg": "Avg {{value}}",
+      "recentVolumeRatio": "Recent Volume Ratio",
+      "recentVolumeRatioHint": "Current volume compared to average of recent candles",
+      "volumeSpike": "Volume Spike",
+      "yes": "YES",
+      "no": "NO"
+    },
+    "sections": {
+      "indicators": "Indicators",
+      "indicatorsDesc": "Indicators calculated in the backend and returned ready for the UI.",
+      "decisionContext": "Decision Context",
+      "decisionContextDesc": "Operational reading used by the bot for BUY, SELL or HOLD."
+    },
+    "context": {
+      "action": "Action",
+      "trend4h": "Trend 4H",
+      "reason": "Reason",
+      "reasonCode": "Reason Code",
+      "whyHold": "Why HOLD/Entry"
+    }
+  },
+  "charts": {
+    "rsiTitle": "RSI Momentum",
+    "rsiDesc": "RSI 5m and RSI 1h with overbought and oversold zones.",
+    "trendTitle": "Price movement + EMAs (1h)",
+    "trendDesc": "Price, EMA50 and EMA200 on the most recent 1h candles.",
+    "candle": "Candle {{number}}",
+    "price": "Price"
+  },
+  "errors": {
+    "loadMarket": "Error loading market.",
+    "fetchMarket": "Error fetching market data.",
+    "invalidPayload": "Invalid market payload.",
+    "noReason": "No reason provided."
+  },
+  "common": {
+    "asset": "ASSET",
+    "locale": "en-US"
+  }
+}
