@@ -2,7 +2,11 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { SignalHistoryItem } from "@invest-agent/shared-types";
 
-const HISTORY_FILE_PATH = path.resolve(__dirname, "../../../data/history.json");
+const DATA_DIR = process.env.DATA_DIR
+  ? path.resolve(process.env.DATA_DIR)
+  : path.resolve(__dirname, "../../../data");
+
+const HISTORY_FILE_PATH = path.join(DATA_DIR, "history.json");
 
 export async function readHistoryFile(): Promise<SignalHistoryItem[]> {
   try {
