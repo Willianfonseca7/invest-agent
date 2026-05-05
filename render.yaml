@@ -15,21 +15,6 @@ services:
       - key: UPSTASH_REDIS_REST_TOKEN
         sync: false
 
-  - type: worker
-    name: invest-agent-worker
-    runtime: node
-    buildCommand: npm ci && npm --workspace apps/worker run build
-    startCommand: node apps/worker/dist/index.js
-    envVars:
-      - key: NODE_ENV
-        value: production
-      - key: WORKER_INTERVAL_MS
-        value: 60000
-      - key: UPSTASH_REDIS_REST_URL
-        sync: false
-      - key: UPSTASH_REDIS_REST_TOKEN
-        sync: false
-
   - type: web
     name: invest-agent-web
     env: static
