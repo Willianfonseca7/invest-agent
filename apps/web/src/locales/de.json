@@ -62,5 +62,71 @@
   "common": {
     "asset": "ASSET",
     "locale": "de-DE"
+  },
+  "reasons": {
+    "INSUFFICIENT_INDICATOR_DATA": {
+      "summary": "Halten: unzureichende Indikatordaten fuer eine risikoarme Entscheidung.",
+      "details": "EMA50 oder EMA200 nicht verfuegbar. Ohne verlasslichen Trend tritt die konservative Strategie nicht ein."
+    },
+    "TREND_STRUCTURE_INVALID": {
+      "summary": "Halten: ungueltiger Trendstruktur.",
+      "details": "Die aktuelle Marktstruktur erlaubt kein sicheres Trading."
+    },
+    "TREND_TOO_WEAK": {
+      "summary": "Halten: Trend noch zu schwach fuer konservativen Kauf.",
+      "details": "Struktur vorhanden, aber ohne ausreichende statistische Robustheit. Strategie wartet auf staerkere Bestaetigung."
+    },
+    "TIMEFRAME_CONFLICT_STRONG": {
+      "summary": "Halten: starker Konflikt zwischen Zeitrahmen.",
+      "details": "Signale der hoeheren und niedrigeren Zeitrahmen widersprechen sich. Strategie vermeidet den Einstieg unter zweideutigen Bedingungen."
+    },
+    "EMA_SLOPE_TOO_FLAT": {
+      "summary": "Halten: EMA50 hat die Steigung verloren, der Trend verlangsamt sich.",
+      "details": "Struktur existiert noch, aber die juengste Beschleunigung bestaetigt keine Fortsetzung. Konservative Strategie meidet Einstiege bei abgeflachter EMA50."
+    },
+    "PRICE_TOO_FAR_FROM_EMA": {
+      "summary": "Halten: Preis zu weit von der EMA50 fuer einen konservativen Einstieg.",
+      "details": "Der Markt ist bezueglich des Trenddurchschnitts ueberdehnt. Ohne aussergewoehnliche Staerke und Volumen vermeidet die Strategie Einstiege weit von der EMA50."
+    },
+    "PRICE_EXTENDED_CRITICAL": {
+      "summary": "Halten: kritisch ueberdehnte Preisentfernung von der EMA.",
+      "details": "Die Preisabweichung ist extrem. Das Rueckschlagsrisiko ist fuer einen konservativen Einstieg zu hoch."
+    },
+    "VOLUME_INSUFFICIENT": {
+      "summary": "Halten: Volumen fuer einen sicheren Einstieg unzureichend.",
+      "details": "Die Marktbeteiligung ist zu gering, um die Bewegung zu validieren."
+    },
+    "VOLUME_BELOW_AVERAGE": {
+      "summary": "Halten: Volumen ohne ausreichende Beteiligungsbestaetigung.",
+      "details": "Das aktuelle Volumen liegt nicht ausreichend ueber dem allgemeinen und juengsten Durchschnitt. Ohne klare Flussbeschleunigung koennte die Bewegung unzureichende Beteiligung aufweisen."
+    },
+    "RSI_TOO_WEAK": {
+      "summary": "Halten: RSI noch zu schwach fuer eine qualitativ hochwertige Erholung.",
+      "details": "Das Momentum zeigt noch keine ausreichende Erholung. Strategie wartet auf bessere Flussausrichtung."
+    },
+    "RSI_OVERHEATED": {
+      "summary": "Halten: RSI zu heiss fuer einen konservativen Einstieg.",
+      "details": "Juengstes Momentum zeigt uebermassige Ueberdehnung. Strategie jagt keinen bereits beschleunigten Preis."
+    },
+    "RSI_NOT_FAVORABLE": {
+      "summary": "Halten: RSI nicht in einer guenstigen Zone fuer den Einstieg.",
+      "details": "Momentumbedingungen sind nicht mit dem erwarteten Einstiegs-Setup ausgerichtet."
+    },
+    "SCORE_TOO_LOW": {
+      "summary": "Halten: konsolidierter Score noch unzureichend fuer den Kauf.",
+      "details": "Der Markt hat positive Punkte, hat aber noch kein ausreichendes Konfluenzniveau erreicht. Konservative Strategie priorisiert Kontextqualitaet vor dem Einstieg."
+    },
+    "PULLBACK_ENTRY_CONFIRMED": {
+      "summary": "Kaufen: kurzer Pullback im primaeren Aufwaertstrend.",
+      "details": "EMA50 ueber EMA200 bestaetigt bullischen Bias. Juengste EMA50-Steigung bleibt positiv. RSI 5m im Pullback ohne Verlust des 1h-Kontexts. Volumen mit professioneller Bestaetigung vermeidet Einstieg in einen Markt mit geringer Beteiligung."
+    },
+    "BUY_CONFIRMED_STRONG_CONTEXT": {
+      "summary": "Kaufen: guenstiger technischer Kontext mit ausreichendem Score.",
+      "details": "Trendstruktur bleibt gesund. Konsolidierter Score hat Trend, Volumen, RSI und EMA-Abstand bestaetigt. Einstieg auch ohne perfektes Setup validiert."
+    },
+    "EXHAUSTION_ENTRY_CONFIRMED": {
+      "summary": "Verkaufen: Erschoepfungsrally im primaeren Abwaertstrend.",
+      "details": "EMA50 unter EMA200 bestaetigt baerischen Bias. Juengste EMA50-Steigung bleibt negativ. RSI 5m gegen den Trend ueberdehnt beguenstigt konservativen Verkauf. Volumen mit professioneller Bestaetigung validiert die Bewegung."
+    }
   }
 }

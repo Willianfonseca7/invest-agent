@@ -62,5 +62,71 @@
   "common": {
     "asset": "ATIVO",
     "locale": "pt-BR"
+  },
+  "reasons": {
+    "INSUFFICIENT_INDICATOR_DATA": {
+      "summary": "Hold: indicador insuficiente para assumir risco.",
+      "details": "EMA50 ou EMA200 indisponivel. Sem tendencia confiavel, a estrategia conservadora nao entra."
+    },
+    "TREND_STRUCTURE_INVALID": {
+      "summary": "Hold: estrutura de tendencia invalida.",
+      "details": "A estrutura atual do mercado nao permite trading seguro."
+    },
+    "TREND_TOO_WEAK": {
+      "summary": "Hold: tendencia ainda fraca para compra conservadora.",
+      "details": "A estrutura existe, mas ainda nao entrega robustez estatistica suficiente. A estrategia prefere esperar mais confirmacao de forca."
+    },
+    "TIMEFRAME_CONFLICT_STRONG": {
+      "summary": "Hold: conflito forte entre os timeframes.",
+      "details": "Sinais dos timeframes superior e inferior estao em contradicao. A estrategia evita entrar em condicoes ambiguas."
+    },
+    "EMA_SLOPE_TOO_FLAT": {
+      "summary": "Hold: a EMA50 perdeu inclinacao e a tendencia esta desacelerando.",
+      "details": "A estrutura ainda existe, mas a aceleracao recente nao confirma continuacao. Estrategia conservadora evita entrar quando a EMA50 achata."
+    },
+    "PRICE_TOO_FAR_FROM_EMA": {
+      "summary": "Hold: preco muito distante da EMA50 para uma entrada conservadora.",
+      "details": "O mercado esta esticado em relacao a media de tendencia. Sem forca e volume excepcionais, a estrategia evita entrar longe da EMA50."
+    },
+    "PRICE_EXTENDED_CRITICAL": {
+      "summary": "Hold: distancia critica do preco em relacao a EMA.",
+      "details": "O desvio do preco e extremo. O risco de reversao abrupta e alto demais para uma entrada conservadora."
+    },
+    "VOLUME_INSUFFICIENT": {
+      "summary": "Hold: volume insuficiente para uma entrada segura.",
+      "details": "A participacao do mercado esta baixa demais para validar o movimento."
+    },
+    "VOLUME_BELOW_AVERAGE": {
+      "summary": "Hold: volume sem confirmacao suficiente de participacao.",
+      "details": "O volume atual nao esta suficientemente acima da media geral e recente. Sem aceleracao clara de fluxo, o movimento pode nao ter participacao suficiente."
+    },
+    "RSI_TOO_WEAK": {
+      "summary": "Hold: RSI ainda fraco para retomada com qualidade.",
+      "details": "O momentum ainda nao mostra retomada suficiente. A estrategia prefere esperar melhor alinhamento do fluxo."
+    },
+    "RSI_OVERHEATED": {
+      "summary": "Hold: RSI aquecido demais para entrada conservadora.",
+      "details": "O momentum recente indica esticamento excessivo. A estrategia prefere nao perseguir preco ja acelerado."
+    },
+    "RSI_NOT_FAVORABLE": {
+      "summary": "Hold: RSI nao esta em zona favoravel para entrada.",
+      "details": "As condicoes de momentum nao estao alinhadas com o setup esperado."
+    },
+    "SCORE_TOO_LOW": {
+      "summary": "Hold: score consolidado ainda insuficiente para compra.",
+      "details": "O mercado tem pontos positivos, mas ainda nao atingiu nivel de confluencia suficiente. A estrategia conservadora prioriza qualidade do contexto antes da entrada."
+    },
+    "PULLBACK_ENTRY_CONFIRMED": {
+      "summary": "Buy: pullback curto dentro de tendencia primaria de alta.",
+      "details": "EMA50 acima da EMA200 confirma vies comprador. Inclinacao recente da EMA50 segue positiva. RSI 5m em pullback sem perder o contexto de 1h. Volume com confirmacao profissional evita entrada em mercado sem participacao."
+    },
+    "BUY_CONFIRMED_STRONG_CONTEXT": {
+      "summary": "Buy: contexto tecnico favoravel com score suficiente.",
+      "details": "A estrutura da tendencia permanece saudavel. O score consolidado aprovou tendencia, volume, RSI e distancia da EMA. A entrada foi validada mesmo sem exigir setup perfeito."
+    },
+    "EXHAUSTION_ENTRY_CONFIRMED": {
+      "summary": "Sell: repique de exaustao dentro de tendencia primaria de baixa.",
+      "details": "EMA50 abaixo da EMA200 confirma vies vendedor. Inclinacao recente da EMA50 segue negativa. RSI 5m esticado contra a tendencia favorece venda conservadora. Volume com confirmacao profissional valida o movimento."
+    }
   }
 }

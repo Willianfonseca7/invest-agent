@@ -62,5 +62,71 @@
   "common": {
     "asset": "ASSET",
     "locale": "en-US"
+  },
+  "reasons": {
+    "INSUFFICIENT_INDICATOR_DATA": {
+      "summary": "Hold: insufficient indicator data to assume risk.",
+      "details": "EMA50 or EMA200 unavailable. No reliable trend, the conservative strategy does not enter."
+    },
+    "TREND_STRUCTURE_INVALID": {
+      "summary": "Hold: invalid trend structure.",
+      "details": "The current market structure does not allow safe trading."
+    },
+    "TREND_TOO_WEAK": {
+      "summary": "Hold: trend still too weak for conservative buying.",
+      "details": "Structure exists, but lacks sufficient statistical robustness. Strategy prefers waiting for stronger confirmation."
+    },
+    "TIMEFRAME_CONFLICT_STRONG": {
+      "summary": "Hold: strong conflict between timeframes.",
+      "details": "Higher and lower timeframe signals are contradicting each other. Strategy avoids entering in ambiguous conditions."
+    },
+    "EMA_SLOPE_TOO_FLAT": {
+      "summary": "Hold: EMA50 lost slope and the trend is decelerating.",
+      "details": "Structure still exists, but recent acceleration does not confirm continuation. Conservative strategy avoids entering when EMA50 flattens."
+    },
+    "PRICE_TOO_FAR_FROM_EMA": {
+      "summary": "Hold: price too far from EMA50 for a conservative entry.",
+      "details": "Market is stretched relative to the trend average. Without exceptional strength and volume, strategy avoids entering far from EMA50."
+    },
+    "PRICE_EXTENDED_CRITICAL": {
+      "summary": "Hold: critically extended price distance from EMA.",
+      "details": "The price deviation is extreme. Risk of sharp reversion is too high for a conservative entry."
+    },
+    "VOLUME_INSUFFICIENT": {
+      "summary": "Hold: volume insufficient for a safe entry.",
+      "details": "Market participation is too low to validate the move."
+    },
+    "VOLUME_BELOW_AVERAGE": {
+      "summary": "Hold: volume without sufficient participation confirmation.",
+      "details": "Current volume is not sufficiently above the general and recent average. Without clear flow acceleration, the move may lack sufficient participation."
+    },
+    "RSI_TOO_WEAK": {
+      "summary": "Hold: RSI still too weak for a quality recovery.",
+      "details": "Momentum does not yet show sufficient recovery. Strategy prefers waiting for better flow alignment."
+    },
+    "RSI_OVERHEATED": {
+      "summary": "Hold: RSI too hot for a conservative entry.",
+      "details": "Recent momentum indicates excessive stretching. Strategy prefers not to chase an already accelerated price."
+    },
+    "RSI_NOT_FAVORABLE": {
+      "summary": "Hold: RSI not in a favorable zone for entry.",
+      "details": "Momentum conditions are not aligned with the expected entry setup."
+    },
+    "SCORE_TOO_LOW": {
+      "summary": "Hold: consolidated score still insufficient for buying.",
+      "details": "Market has positive points, but has not yet reached sufficient confluence level. Conservative strategy prioritizes context quality before entering."
+    },
+    "PULLBACK_ENTRY_CONFIRMED": {
+      "summary": "Buy: short pullback within primary uptrend.",
+      "details": "EMA50 above EMA200 confirms bullish bias. Recent EMA50 slope remains positive. RSI 5m in pullback without losing 1h context. Volume with professional confirmation avoids entry in low-participation market."
+    },
+    "BUY_CONFIRMED_STRONG_CONTEXT": {
+      "summary": "Buy: favorable technical context with sufficient score.",
+      "details": "Trend structure remains healthy. Consolidated score approved trend, volume, RSI and EMA distance. Entry validated even without requiring a perfect setup."
+    },
+    "EXHAUSTION_ENTRY_CONFIRMED": {
+      "summary": "Sell: exhaustion bounce within primary downtrend.",
+      "details": "EMA50 below EMA200 confirms bearish bias. Recent EMA50 slope remains negative. RSI 5m stretched against the trend favors conservative selling. Volume with professional confirmation validates the move."
+    }
   }
 }

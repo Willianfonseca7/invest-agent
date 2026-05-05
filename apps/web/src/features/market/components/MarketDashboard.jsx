@@ -248,7 +248,7 @@ export function MarketDashboard() {
 
             <div className="context-row">
               <span>{t("dashboard.context.reason")}</span>
-              <p>{market.reason?.summary || "—"}</p>
+              <p>{market.reason?.code ? t(`reasons.${market.reason.code}.summary`, { defaultValue: market.reason.summary || "—" }) : "—"}</p>
             </div>
 
             <div className="context-row">
@@ -258,7 +258,7 @@ export function MarketDashboard() {
 
             <div className="context-row">
               <span>{t("dashboard.context.whyHold")}</span>
-              <p>{market.reason?.details?.join(" ") || "—"}</p>
+              <p>{market.reason?.code ? t(`reasons.${market.reason.code}.details`, { defaultValue: market.reason?.details?.join(" ") || "—" }) : "—"}</p>
             </div>
           </div>
         </SectionCard>
