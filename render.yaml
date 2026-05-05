@@ -10,8 +10,10 @@ services:
         value: production
       - key: PORT
         value: 10000
-      - key: DATA_DIR
-        value: /data
+      - key: UPSTASH_REDIS_REST_URL
+        sync: false
+      - key: UPSTASH_REDIS_REST_TOKEN
+        sync: false
 
   - type: worker
     name: invest-agent-worker
@@ -21,12 +23,12 @@ services:
     envVars:
       - key: NODE_ENV
         value: production
-      - key: DATA_DIR
-        value: /data
-    disk:
-      name: invest-agent-data
-      mountPath: /data
-      sizeGB: 1
+      - key: WORKER_INTERVAL_MS
+        value: 60000
+      - key: UPSTASH_REDIS_REST_URL
+        sync: false
+      - key: UPSTASH_REDIS_REST_TOKEN
+        sync: false
 
   - type: static
     name: invest-agent-web

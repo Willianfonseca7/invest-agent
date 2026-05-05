@@ -10,6 +10,8 @@ const SYMBOLS = ["BTCUSDT", "ETHUSDT", "SOLUSDT"];
 async function runBot() {
   console.log("🤖 Bot iniciado em modo:", config.executionMode);
 
+  const intervalMs = Number(process.env.WORKER_INTERVAL_MS) || 60_000;
+
   setInterval(async () => {
     console.log("\n========================");
 
@@ -46,7 +48,7 @@ async function runBot() {
         console.error(`Erro em ${symbol}:`, error);
       }
     }
-  }, 5000);
+  }, intervalMs);
 }
 
 runBot();
