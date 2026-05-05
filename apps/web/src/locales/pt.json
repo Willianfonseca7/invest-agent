@@ -40,8 +40,9 @@
       "commentaryDesc": "Leitura contextual gerada automaticamente com base nos indicadores tecnicos atuais."
     },
     "commentary": {
-      "loading": "Gerando analise...",
-      "unavailable": "Analise indisponivel no momento."
+      "loading": "Carregando analise...",
+      "unavailable": "Analise indisponivel no momento.",
+      "context": "Decisao atual: {{action}} com confianca de {{confidence}}, tendencia 4H: {{trend}}."
     },
     "context": {
       "action": "Acao",

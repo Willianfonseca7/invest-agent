@@ -83,7 +83,7 @@ export function MarketDashboard() {
   const { market, loading, refreshing, error, lastUpdatedAt, refetch } =
     useMarketOverview(symbol);
 
-  const { commentary, loading: commentaryLoading } = useMarketCommentary(symbol, market);
+  const { commentary, loading: commentaryLoading } = useMarketCommentary(market);
 
   useEffect(() => {
     window.localStorage.setItem(STORAGE_KEY, symbol);

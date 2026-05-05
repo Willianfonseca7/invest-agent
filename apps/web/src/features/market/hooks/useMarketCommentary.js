@@ -1,42 +1,47 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { fetchMarketCommentary } from "@/services/marketApi";
 
-export function useMarketCommentary(symbol, market) {
-  const { i18n } = useTranslation();
-  const [commentary, setCommentary] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const prevKeyRef = useRef(null);
+export function useMarketCommentary(market) {
+  const { t } = useTranslation();
 
-  const load = useCallback(
-    async (signal) => {
-      if (!market) return;
+  const commentary = useMemo(() => {
+    if (!market?.reason?.code) return null;
 
-      setLoading(true);
-      const lang = i18n.language?.split("-")[0] || "pt";
-      const text = await fetchMarketCommentary(symbol, lang, { signal });
+    const code = market.reason.code;
+    const action = market.action;
+    const confidence = market.confidence
+      ? `${(market.confidence * 100).toFixed(0)}%`
+      : null;
+    const trend = market.trend4H;
 
-      if (text !== null) {
-        setCommentary(text);
-      }
+    const summary = t(`reasons.${code}.summary`, {
+      defaultValue: market.reason.summary || null,
+    });
 
-      setLoading(false);
-    },
-    [symbol, market, i18n.language]
-  );
+    const details = t(`reasons.${code}.details`, {
+      defaultValue: market.reason.details?.join(" ") || null,
+    });
 
-  useEffect(() => {
-    if (!market) return;
+    if (!summary && !details) return null;
 
-    const key = `${symbol}-${market.timestamp}-${i18n.language}`;
-    if (key === prevKeyRef.current) return;
-    prevKeyRef.current = key;
+    const parts = [];
 
-    const controller = new AbortController();
-    load(controller.signal);
+    if (summary) parts.push(summary);
+    if (details && details !== summary) parts.push(details);
 
-    return () => controller.abort();
-  }, [symbol, market, i18n.language, load]);
+    if (action && confidence && trend) {
+      parts.push(
+        t("dashboard.commentary.context", {
+          action,
+          confidence,
+          trend,
+          defaultValue: "",
+        })
+      );
+    }
 
-  return { commentary, loading };
+    return parts.filter(Boolean).join(" ");
+  }, [market, t]);
+
+  return { commentary, loading: false };
 }

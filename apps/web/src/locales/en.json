@@ -40,8 +40,9 @@
       "commentaryDesc": "Contextual reading generated automatically based on current technical indicators."
     },
     "commentary": {
-      "loading": "Generating analysis...",
-      "unavailable": "Analysis unavailable at the moment."
+      "loading": "Loading analysis...",
+      "unavailable": "Analysis unavailable at the moment.",
+      "context": "Current decision: {{action}} with {{confidence}} confidence, 4H trend: {{trend}}."
     },
     "context": {
       "action": "Action",

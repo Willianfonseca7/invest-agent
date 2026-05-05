@@ -40,8 +40,9 @@
       "commentaryDesc": "Kontextuelle Analyse, automatisch basierend auf den aktuellen technischen Indikatoren generiert."
     },
     "commentary": {
-      "loading": "Analyse wird erstellt...",
-      "unavailable": "Analyse momentan nicht verfügbar."
+      "loading": "Analyse wird geladen...",
+      "unavailable": "Analyse momentan nicht verfügbar.",
+      "context": "Aktuelle Entscheidung: {{action}} mit {{confidence}} Konfidenz, 4H-Trend: {{trend}}."
     },
     "context": {
       "action": "Action",

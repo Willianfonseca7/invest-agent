@@ -8,9 +8,7 @@
     "start": "node dist/server.js"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.53.0",
-    "@invest-agent/ai-client": "*",
-    "cors": "^2.8.5",
+"cors": "^2.8.5",
     "dotenv": "^17.0.0",
     "express": "^5.1.0"
   },
