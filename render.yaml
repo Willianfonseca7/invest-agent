@@ -22,7 +22,7 @@ services:
     staticPublishPath: apps/web/dist
     envVars:
       - key: VITE_API_URL
-        value: https://invest-agent-otc0.onrender.com
+        value: https://invest-agent-otc0.onrender.com/api
     routes:
       - type: rewrite
         source: /*
