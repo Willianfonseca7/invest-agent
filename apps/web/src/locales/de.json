@@ -35,7 +35,13 @@
       "indicators": "Indicators",
       "indicatorsDesc": "Im Backend berechnete Indikatoren, fertig für die UI.",
       "decisionContext": "Decision Context",
-      "decisionContextDesc": "Operativer Lesewert des Bots für BUY, SELL oder HOLD."
+      "decisionContextDesc": "Operativer Lesewert des Bots für BUY, SELL oder HOLD.",
+      "commentary": "Marktanalyse",
+      "commentaryDesc": "Kontextuelle Analyse, automatisch basierend auf den aktuellen technischen Indikatoren generiert."
+    },
+    "commentary": {
+      "loading": "Analyse wird erstellt...",
+      "unavailable": "Analyse momentan nicht verfügbar."
     },
     "context": {
       "action": "Action",

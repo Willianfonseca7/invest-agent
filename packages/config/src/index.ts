@@ -9,6 +9,8 @@ const executionMode = VALID_MODES.includes(rawMode as ExecutionMode)
 export const config = {
   executionMode,
 
+  anthropicApiKey: process.env.ANTHROPIC_API_KEY ?? "",
+
   trading: {
     symbols: ["BTCUSDT", "ETHUSDT", "SOLUSDT"],
     defaultSymbol: "BTCUSDT",

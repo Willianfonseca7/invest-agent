@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useMarketOverview } from "../hooks/useMarketOverview";
+import { useMarketCommentary } from "../hooks/useMarketCommentary";
 import { formatCurrency, formatNumber, formatPercent } from "@/utils/format";
 import { MetricCard } from "@/components/ui/MetricCard";
 import { SectionCard } from "@/components/ui/SectionCard";
@@ -81,6 +82,8 @@ export function MarketDashboard() {
 
   const { market, loading, refreshing, error, lastUpdatedAt, refetch } =
     useMarketOverview(symbol);
+
+  const { commentary, loading: commentaryLoading } = useMarketCommentary(symbol, market);
 
   useEffect(() => {
     window.localStorage.setItem(STORAGE_KEY, symbol);
@@ -271,6 +274,19 @@ export function MarketDashboard() {
           closes1h={market.closes1h}
         />
       </div>
+
+      <SectionCard
+        title={t("dashboard.sections.commentary")}
+        description={t("dashboard.sections.commentaryDesc")}
+      >
+        {commentaryLoading ? (
+          <p className="commentary-loading">{t("dashboard.commentary.loading")}</p>
+        ) : commentary ? (
+          <p className="commentary-text">{commentary}</p>
+        ) : (
+          <p className="commentary-empty">{t("dashboard.commentary.unavailable")}</p>
+        )}
+      </SectionCard>
     </div>
   );
 }

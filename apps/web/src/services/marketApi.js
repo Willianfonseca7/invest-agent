@@ -82,3 +82,24 @@ export async function fetchMarketOverview(
     throw new Error(getErrorMessage(error));
   }
 }
+
+export async function fetchMarketCommentary(symbol = "BTCUSDT", lang = "pt", options = {}) {
+  const safeSymbol = String(symbol || "BTCUSDT").trim().toUpperCase();
+
+  try {
+    const response = await marketApi.get("/market/commentary", {
+      params: { symbol: safeSymbol, lang },
+      signal: options.signal,
+      timeout: 30_000
+    });
+
+    return typeof response.data?.commentary === "string"
+      ? response.data.commentary
+      : null;
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.code === "ERR_CANCELED") {
+      return null;
+    }
+    return null;
+  }
+}
