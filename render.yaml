@@ -30,8 +30,9 @@ services:
       - key: UPSTASH_REDIS_REST_TOKEN
         sync: false
 
-  - type: static
+  - type: web
     name: invest-agent-web
+    env: static
     buildCommand: npm ci && npm --workspace apps/web run build
     staticPublishPath: apps/web/dist
     envVars:
