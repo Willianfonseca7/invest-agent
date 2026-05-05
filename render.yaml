@@ -2,7 +2,7 @@ services:
   - type: web
     name: invest-agent-api
     runtime: node
-    buildCommand: npm ci && npm --workspace apps/api run build
+    buildCommand: npm ci --include=dev && npm --workspace apps/api run build
     startCommand: node apps/api/dist/server.js
     healthCheckPath: /health
     envVars:
