@@ -123,9 +123,9 @@ async function runCycle(): Promise<void> {
 }
 
 async function start(): Promise<void> {
-  const intervalMs = Number(process.env.WORKER_INTERVAL_MS) || 60_000;
+  const intervalMs = Number(process.env.WORKER_INTERVAL_MS ?? 60_000);
 
-  console.log(`mode: ${config.executionMode} | interval: ${intervalMs}ms`);
+  console.log(`mode: ${config.executionMode} | interval: ${intervalMs === 0 ? "single-run" : `${intervalMs}ms`}`);
 
   if (IS_LIVE) {
     console.log(
@@ -134,6 +134,11 @@ async function start(): Promise<void> {
   }
 
   await runCycle();
+
+  if (intervalMs === 0) {
+    process.exit(0);
+  }
+
   setInterval(runCycle, intervalMs);
 }
 
