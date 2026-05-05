@@ -1,0 +1,19 @@
+services:
+  - name: invest-worker
+    type: web
+    git:
+      repository: github.com/Willianfonseca7/invest-agent
+      branch: main
+    build:
+      buildpack:
+        build_command: npm ci --include=dev && npm --workspace apps/worker run build
+        run_command: node apps/worker/dist/index.js
+    instance_types:
+      - type: free
+    ports:
+      - port: 8080
+        protocol: http
+    health_checks:
+      - path: /
+        port: 8080
+        protocol: http

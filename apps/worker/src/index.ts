@@ -1,3 +1,4 @@
+import http from "node:http";
 import { analyzeMultiTimeframeMarket } from "@invest-agent/strategy-engine";
 import { BinanceAdapter } from "@invest-agent/exchange-adapters";
 import { config } from "@invest-agent/config";
@@ -8,6 +9,14 @@ import {
   removeOpenPosition,
   saveOpenPosition,
 } from "@invest-agent/utils";
+
+const PORT = Number(process.env.PORT) || 8080;
+http
+  .createServer((_req, res) => {
+    res.writeHead(200, { "Content-Type": "application/json" });
+    res.end(JSON.stringify({ ok: true, service: "worker", mode: config.executionMode }));
+  })
+  .listen(PORT);
 
 const binance = new BinanceAdapter();
 
