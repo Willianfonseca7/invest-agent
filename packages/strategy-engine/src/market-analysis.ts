@@ -89,10 +89,10 @@ export function decideMarketAction(input: DecisionInput) {
     return buildHoldDecision(
       input,
       "INSUFFICIENT_INDICATOR_DATA",
-      "Hold: indicador insuficiente para assumir risco.",
+      "Hold: insufficient indicator data to assume risk.",
       [
-        "EMA50 ou EMA200 indisponível.",
-        "Sem tendência confiável, a estratégia conservadora não entra.",
+        "EMA50 or EMA200 unavailable.",
+        "No reliable trend, conservative strategy does not enter.",
       ],
       0.92
     );
@@ -112,17 +112,14 @@ export function decideMarketAction(input: DecisionInput) {
   }
 
   const hasStrongTrend = trendStrength >= THRESHOLDS.trendStrength;
-  const hasPositiveSlope =
-    ema50Slope >= THRESHOLDS.positiveEma50Slope;
-  const hasNegativeSlope =
-    ema50Slope <= THRESHOLDS.negativeEma50Slope;
+  const hasPositiveSlope = ema50Slope >= THRESHOLDS.positiveEma50Slope;
+  const hasNegativeSlope = ema50Slope <= THRESHOLDS.negativeEma50Slope;
 
   const hasHealthyVolume =
     volumeRatio >= THRESHOLDS.healthyVolumeRatio ||
     recentVolumeRatio >= THRESHOLDS.healthyRecentVolumeRatio;
 
-  const hasProfessionalVolumeConfirmation =
-    hasHealthyVolume && hasVolumeSpike;
+  const hasProfessionalVolumeConfirmation = hasHealthyVolume && hasVolumeSpike;
 
   const isPriceExtendedFromEma =
     Math.abs(priceDistanceToEma50) > THRESHOLDS.maxPriceDistanceToEma50;
@@ -160,12 +157,12 @@ export function decideMarketAction(input: DecisionInput) {
     return buildBuyDecision(
       input,
       "PULLBACK_ENTRY_CONFIRMED",
-      "Buy: pullback curto dentro de tendência primária de alta.",
+      "Buy: short pullback within primary uptrend.",
       [
-        "EMA50 acima da EMA200 confirma viés comprador.",
-        "Inclinação recente da EMA50 segue positiva.",
-        "RSI 5m em pullback sem perder o contexto de 1h.",
-        "Volume com confirmação profissional evita entrada em mercado sem participação.",
+        "EMA50 above EMA200 confirms bullish bias.",
+        "Recent EMA50 slope remains positive.",
+        "RSI 5m in pullback without losing 1h context.",
+        "Volume with professional confirmation avoids entry in low-participation market.",
       ],
       clamp(confidenceFromScore + 0.04, 0.5, 0.96),
       scoreBreakdown
@@ -183,12 +180,12 @@ export function decideMarketAction(input: DecisionInput) {
     return buildSellDecision(
       input,
       "EXHAUSTION_ENTRY_CONFIRMED",
-      "Sell: repique de exaustão dentro de tendência primária de baixa.",
+      "Sell: exhaustion bounce within primary downtrend.",
       [
-        "EMA50 abaixo da EMA200 confirma viés vendedor.",
-        "Inclinação recente da EMA50 segue negativa.",
-        "RSI 5m esticado contra a tendência favorece venda conservadora.",
-        "Volume com confirmação profissional valida o movimento.",
+        "EMA50 below EMA200 confirms bearish bias.",
+        "Recent EMA50 slope remains negative.",
+        "RSI 5m stretched against the trend favors conservative selling.",
+        "Volume with professional confirmation validates the move.",
       ],
       clamp(confidenceFromScore + 0.04, 0.5, 0.96),
       scoreBreakdown
@@ -199,10 +196,10 @@ export function decideMarketAction(input: DecisionInput) {
     return buildHoldDecision(
       input,
       "PRICE_TOO_FAR_FROM_EMA",
-      "Hold: preço muito distante da EMA50 para uma entrada conservadora.",
+      "Hold: price too far from EMA50 for a conservative entry.",
       [
-        "O mercado está esticado em relação à média de tendência.",
-        "Sem força e volume excepcionais, a estratégia evita entrar longe da EMA50.",
+        "Market is stretched relative to the trend average.",
+        "Without exceptional strength and volume, strategy avoids entering far from EMA50.",
       ],
       clamp(confidenceFromScore, 0.7, 0.9),
       scoreBreakdown
@@ -213,11 +210,11 @@ export function decideMarketAction(input: DecisionInput) {
     return buildBuyDecision(
       input,
       "BUY_CONFIRMED_STRONG_CONTEXT",
-      "Buy: contexto técnico favorável com score suficiente.",
+      "Buy: favorable technical context with sufficient score.",
       [
-        "A estrutura da tendência permanece saudável.",
-        "O score consolidado aprovou tendência, volume, RSI e distância da EMA.",
-        "A entrada foi validada mesmo sem exigir setup perfeito.",
+        "Trend structure remains healthy.",
+        "Consolidated score approved trend, volume, RSI and EMA distance.",
+        "Entry validated even without requiring a perfect setup.",
       ],
       confidenceFromScore,
       scoreBreakdown
@@ -234,11 +231,11 @@ export function decideMarketAction(input: DecisionInput) {
     return buildBuyDecision(
       input,
       "BUY_CONFIRMED_STRONG_CONTEXT",
-      "Buy: contexto forte compensou uma imperfeição secundária.",
+      "Buy: strong context compensated a secondary imperfection.",
       [
-        "A tendência está forte no timeframe principal.",
-        "O volume recente confirmou participação suficiente.",
-        "A estratégia permitiu a entrada mesmo sem setup perfeito, por contexto excepcional.",
+        "Trend is strong on the primary timeframe.",
+        "Recent volume confirmed sufficient participation.",
+        "Strategy allowed entry even without a perfect setup due to exceptional context.",
       ],
       clamp(confidenceFromScore + 0.03, 0.5, 0.96),
       scoreBreakdown
@@ -249,10 +246,10 @@ export function decideMarketAction(input: DecisionInput) {
     return buildHoldDecision(
       input,
       "TREND_TOO_WEAK",
-      "Hold: tendência ainda fraca para compra conservadora.",
+      "Hold: trend still too weak for conservative buying.",
       [
-        "A estrutura existe, mas ainda não entrega robustez estatística suficiente.",
-        "A estratégia prefere esperar mais confirmação de força.",
+        "Structure exists, but lacks sufficient statistical robustness.",
+        "Strategy prefers waiting for stronger confirmation.",
       ],
       clamp(confidenceFromScore, 0.74, 0.92),
       scoreBreakdown
@@ -266,10 +263,10 @@ export function decideMarketAction(input: DecisionInput) {
     return buildHoldDecision(
       input,
       "EMA_SLOPE_TOO_FLAT",
-      "Hold: a EMA50 perdeu inclinação e a tendência está desacelerando.",
+      "Hold: EMA50 lost slope and the trend is decelerating.",
       [
-        "A estrutura ainda existe, mas a aceleração recente não confirma continuação.",
-        "Estratégia conservadora evita entrar quando a EMA50 achata.",
+        "Structure still exists, but recent acceleration does not confirm continuation.",
+        "Conservative strategy avoids entering when EMA50 flattens.",
       ],
       clamp(confidenceFromScore, 0.72, 0.9),
       scoreBreakdown
@@ -280,10 +277,10 @@ export function decideMarketAction(input: DecisionInput) {
     return buildHoldDecision(
       input,
       "VOLUME_BELOW_AVERAGE",
-      "Hold: volume sem confirmação suficiente de participação.",
+      "Hold: volume without sufficient participation confirmation.",
       [
-        "O volume atual não está suficientemente acima da média geral e recente.",
-        "Sem aceleração clara de fluxo, o movimento pode não ter participação suficiente.",
+        "Current volume is not sufficiently above the general and recent average.",
+        "Without clear flow acceleration, the move may lack sufficient participation.",
       ],
       clamp(confidenceFromScore, 0.7, 0.9),
       scoreBreakdown
@@ -294,10 +291,10 @@ export function decideMarketAction(input: DecisionInput) {
     return buildHoldDecision(
       input,
       "RSI_OVERHEATED",
-      "Hold: RSI aquecido demais para entrada conservadora.",
+      "Hold: RSI too hot for a conservative entry.",
       [
-        "O momentum recente indica esticamento excessivo.",
-        "A estratégia prefere não perseguir preço já acelerado.",
+        "Recent momentum indicates excessive stretching.",
+        "Strategy prefers not to chase an already accelerated price.",
       ],
       clamp(confidenceFromScore, 0.68, 0.9),
       scoreBreakdown
@@ -308,10 +305,10 @@ export function decideMarketAction(input: DecisionInput) {
     return buildHoldDecision(
       input,
       "RSI_TOO_WEAK",
-      "Hold: RSI ainda fraco para retomada com qualidade.",
+      "Hold: RSI still too weak for a quality recovery.",
       [
-        "O momentum ainda não mostra retomada suficiente.",
-        "A estratégia prefere esperar melhor alinhamento do fluxo.",
+        "Momentum does not yet show sufficient recovery.",
+        "Strategy prefers waiting for better flow alignment.",
       ],
       clamp(confidenceFromScore, 0.66, 0.88),
       scoreBreakdown
@@ -321,10 +318,10 @@ export function decideMarketAction(input: DecisionInput) {
   return buildHoldDecision(
     input,
     "SCORE_TOO_LOW",
-    "Hold: score consolidado ainda insuficiente para compra.",
+    "Hold: consolidated score still insufficient for buying.",
     [
-      "O mercado tem pontos positivos, mas ainda não atingiu nível de confluência suficiente.",
-      "A estratégia conservadora prioriza qualidade do contexto antes da entrada.",
+      "Market has positive points, but has not yet reached sufficient confluence level.",
+      "Conservative strategy prioritizes context quality before entering.",
     ],
     clamp(confidenceFromScore, 0.62, 0.88),
     scoreBreakdown

@@ -14,49 +14,33 @@ app.use("/api", marketRouter);
 
 const binance = new BinanceAdapter();
 
-// HEALTH
 app.get("/health", (_req, res) => {
-  res.json({
-    ok: true,
-    service: "api",
-    mode: config.executionMode,
-    message: "Invest Agent API online"
-  });
+  res.json({ ok: true, service: "api", mode: config.executionMode });
 });
 
-// SIGNAL
 app.get("/signal/:symbol", async (req, res) => {
   try {
-    const symbol = req.params.symbol.toUpperCase();
-    const signal = await getMarketOverview(symbol);
-
+    const signal = await getMarketOverview(req.params.symbol.toUpperCase());
     res.json(signal);
   } catch (error) {
-    res.status(500).json({
-      error: error instanceof Error ? error.message : "Erro ao gerar sinal"
-    });
+    res.status(500).json({ error: error instanceof Error ? error.message : "Signal error" });
   }
 });
 
-// MARKET
 app.get("/market/ticker/:symbol", async (req, res) => {
   try {
     const ticker = await binance.getTicker(req.params.symbol);
     res.json(ticker);
   } catch (error) {
-    res.status(500).json({
-      mensagem: "Falha ao obter o ticker",
-      erro: error instanceof Error ? error.message : "Erro desconhecido"
-    });
+    res.status(500).json({ error: error instanceof Error ? error.message : "Ticker error" });
   }
 });
 
-// HISTORY
 app.get("/history", async (_req, res) => {
   try {
     const history = await readHistoryFile();
     res.json(history);
   } catch {
-    res.status(500).json({ error: "Erro ao ler histórico" });
+    res.status(500).json({ error: "History read error" });
   }
 });

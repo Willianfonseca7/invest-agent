@@ -16,24 +16,24 @@ export function getFatalHoldReason(input: DecisionInput): {
   if (isStructuralTrendInvalid) {
     return {
       code: "TREND_STRUCTURE_INVALID",
-      summary: "Hold: estrutura principal insuficiente para compra conservadora.",
+      summary: "Hold: trend structure insufficient for conservative buy.",
       details: [
-        "A tendência estrutural não confirma viés comprador robusto.",
-        "Sem EMA50 acima da EMA200 com contexto alinhado, a estratégia não compra."
+        "Structural trend does not confirm a robust bullish bias.",
+        "EMA50 must be above EMA200 with aligned context before entering.",
       ],
-      confidence: 0.9
+      confidence: 0.9,
     };
   }
 
   if (input.trend4H === "DOWN") {
     return {
       code: "TIMEFRAME_CONFLICT_STRONG",
-      summary: "Hold: timeframe principal está contra a entrada compradora.",
+      summary: "Hold: primary timeframe is against the long entry.",
       details: [
-        "O contexto de timeframe maior está vendedor.",
-        "A estratégia evita comprar contra a direção principal."
+        "Higher timeframe context is bearish.",
+        "Strategy avoids buying against the primary direction.",
       ],
-      confidence: 0.9
+      confidence: 0.9,
     };
   }
 
@@ -43,24 +43,24 @@ export function getFatalHoldReason(input: DecisionInput): {
   ) {
     return {
       code: "VOLUME_INSUFFICIENT",
-      summary: "Hold: volume insuficiente para validar continuação.",
+      summary: "Hold: volume insufficient to validate continuation.",
       details: [
-        "O fluxo recente está fraco para sustentar uma entrada conservadora.",
-        "Sem participação mínima, o risco de falso rompimento aumenta."
+        "Recent flow is too weak to support a conservative entry.",
+        "Without minimum participation, false breakout risk increases.",
       ],
-      confidence: 0.86
+      confidence: 0.86,
     };
   }
 
   if (Math.abs(input.priceDistanceToEma50) > THRESHOLDS.criticalPriceExtension) {
     return {
       code: "PRICE_EXTENDED_CRITICAL",
-      summary: "Hold: preço criticamente esticado em relação à EMA50.",
+      summary: "Hold: price critically extended from EMA50.",
       details: [
-        "O mercado já se afastou demais da média de tendência.",
-        "Entrar nesse ponto aumenta o risco de compra tardia."
+        "Market has moved too far from the trend average.",
+        "Entering at this point increases the risk of a late buy.",
       ],
-      confidence: 0.88
+      confidence: 0.88,
     };
   }
 
