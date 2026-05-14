@@ -10,9 +10,13 @@ services:
         value: production
       - key: PORT
         value: 10000
+      - key: EXECUTION_MODE
+        value: simulation
       - key: UPSTASH_REDIS_REST_URL
         sync: false
       - key: UPSTASH_REDIS_REST_TOKEN
+        sync: false
+      - key: ANTHROPIC_API_KEY
         sync: false
 
   - type: web

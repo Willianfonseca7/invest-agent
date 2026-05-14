@@ -31,7 +31,7 @@ export class BinanceAdapter {
   private readonly apiSecret: string;
 
   constructor() {
-    const isTestnet = process.env.BINANCE_TESTNET === "true";
+    const isTestnet = process.env.BINANCE_TESTNET !== "false";
     this.baseUrl = isTestnet
       ? "https://testnet.binance.vision"
       : "https://api.binance.com";
