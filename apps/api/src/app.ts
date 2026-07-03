@@ -4,6 +4,7 @@ import cors from "cors";
 import { config } from "@invest-agent/config";
 import { BinanceAdapter } from "@invest-agent/exchange-adapters";
 import { marketRouter } from "./routes/market";
+import { operationsRouter } from "./routes/operations";
 import { getMarketOverview } from "./services/market-data";
 
 export const app = express();
@@ -11,6 +12,7 @@ export const app = express();
 app.use(cors());
 app.use(express.json());
 app.use("/api", marketRouter);
+app.use("/api", operationsRouter);
 
 const binance = new BinanceAdapter();
 
