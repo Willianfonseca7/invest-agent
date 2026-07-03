@@ -322,6 +322,98 @@ select {
   text-align: right;
 }
 
+.operations-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.operations-toolbar p,
+.operations-panel__header p,
+.trade-row__main p,
+.trade-row__stats span {
+  color: #93a7c4;
+  margin: 0;
+}
+
+.operations-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+  margin-top: 18px;
+}
+
+.operations-panel {
+  border: 1px solid rgba(148, 163, 184, 0.12);
+  border-radius: 24px;
+  padding: 20px;
+  background: rgba(7, 14, 26, 0.72);
+}
+
+.operations-panel__header {
+  margin-bottom: 16px;
+}
+
+.operations-panel__header h3 {
+  margin: 0 0 6px;
+}
+
+.operations-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.trade-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 0;
+  border-top: 1px solid rgba(148, 163, 184, 0.12);
+}
+
+.trade-row:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.trade-row__main,
+.trade-row__stats {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.trade-row__title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.trade-row__stats {
+  align-items: flex-end;
+  text-align: right;
+}
+
+.trade-row__pnl--buy {
+  color: #86efac;
+}
+
+.trade-row__pnl--sell {
+  color: #fca5a5;
+}
+
+.trade-row__pnl--neutral {
+  color: #dbeafe;
+}
+
+.metrics-runtime {
+  margin-top: 18px;
+}
+
 @media (max-width: 900px) {
   .hero-panel,
   .details-grid {
@@ -335,6 +427,21 @@ select {
 
   .metric-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .operations-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .operations-toolbar,
+  .trade-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .trade-row__stats {
+    align-items: flex-start;
+    text-align: left;
   }
 }
 

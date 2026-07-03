@@ -11,7 +11,14 @@ import { useTranslation } from "react-i18next";
 import { SectionCard } from "@/components/ui/SectionCard";
 import { formatCurrency } from "@/utils/format";
 
-function calculateEMASequence(prices, period) {
+type TrendChartPoint = {
+  candle: number;
+  price: number;
+  ema50: number | null;
+  ema200: number | null;
+};
+
+function calculateEMASequence(prices: number[], period: number): Array<number | null> {
   if (!Array.isArray(prices) || prices.length < period) {
     return prices.map(() => null);
   }
@@ -32,7 +39,7 @@ function calculateEMASequence(prices, period) {
   return result;
 }
 
-function buildChartData(closes1h) {
+function buildChartData(closes1h: number[]): TrendChartPoint[] {
   const ema50Series = calculateEMASequence(closes1h, 50);
   const ema200Series = calculateEMASequence(closes1h, 200);
 
@@ -44,7 +51,11 @@ function buildChartData(closes1h) {
   }));
 }
 
-export function MarketTrendChart({ closes1h = [] }) {
+type MarketTrendChartProps = {
+  closes1h?: number[];
+};
+
+export function MarketTrendChart({ closes1h = [] }: MarketTrendChartProps) {
   const { t } = useTranslation();
 
   if (!Array.isArray(closes1h) || closes1h.length === 0) {
@@ -69,7 +80,7 @@ export function MarketTrendChart({ closes1h = [] }) {
               domain={["auto", "auto"]}
             />
             <Tooltip
-              formatter={(value, name) => [formatCurrency(value), name]}
+              formatter={(value, name) => [formatCurrency(Number(value)), name]}
               labelFormatter={(label) => t("charts.candle", { number: label })}
             />
             <Line

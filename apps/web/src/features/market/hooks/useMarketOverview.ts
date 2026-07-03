@@ -1,18 +1,27 @@
 import { useCallback, useEffect, useState } from "react";
 import { fetchMarketOverview } from "@/services/marketApi";
 import i18n from "@/i18n";
+import type { MarketOverview } from "@/types/market";
 
 const REFRESH_INTERVAL_IN_MS = 30_000;
+const DEFAULT_SYMBOL = "BTCUSDT";
 
-export function useMarketOverview(symbol = "BTCUSDT") {
-  const [market, setMarket] = useState(null);
+export function useMarketOverview(
+  symbol = DEFAULT_SYMBOL,
+  hookOptions: { onInvalidSymbol?: (symbol: string) => void } = {}
+) {
+  const { onInvalidSymbol } = hookOptions;
+  const [market, setMarket] = useState<MarketOverview | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState("");
-  const [lastUpdatedAt, setLastUpdatedAt] = useState(null);
+  const [lastUpdatedAt, setLastUpdatedAt] = useState<Date | null>(null);
 
   const loadMarket = useCallback(
-    async (isBackgroundRefresh = false, options = {}) => {
+    async (
+      isBackgroundRefresh = false,
+      requestOptions: { signal?: AbortSignal } = {}
+    ) => {
       try {
         setError("");
 
@@ -23,16 +32,33 @@ export function useMarketOverview(symbol = "BTCUSDT") {
         }
 
         const nextMarket = await fetchMarketOverview(symbol, {
-          signal: options.signal
+          signal: requestOptions.signal
         });
         setMarket(nextMarket);
         setLastUpdatedAt(new Date());
       } catch (requestError) {
-        if (
-          requestError instanceof Error &&
-          requestError.message === "REQUEST_CANCELED"
-        ) {
+        if (requestError instanceof Error && requestError.message === "REQUEST_CANCELED") {
           return;
+        }
+
+        const shouldFallbackToDefault =
+          symbol !== DEFAULT_SYMBOL &&
+          requestError instanceof Error &&
+          /Binance klines failed: 400/i.test(requestError.message);
+
+        if (shouldFallbackToDefault) {
+          try {
+            const fallbackMarket = await fetchMarketOverview(DEFAULT_SYMBOL, {
+              signal: requestOptions.signal
+            });
+            setMarket(fallbackMarket);
+            setLastUpdatedAt(new Date());
+            setError("");
+            onInvalidSymbol?.(DEFAULT_SYMBOL);
+            return;
+          } catch {
+            // Fall through to the generic error state if the fallback request also fails.
+          }
         }
 
         setError(
@@ -48,7 +74,7 @@ export function useMarketOverview(symbol = "BTCUSDT") {
         }
       }
     },
-    [symbol]
+    [onInvalidSymbol, symbol]
   );
 
   useEffect(() => {
@@ -72,6 +98,6 @@ export function useMarketOverview(symbol = "BTCUSDT") {
     refreshing,
     error,
     lastUpdatedAt,
-    refetch: () => loadMarket(true),
+    refetch: async () => loadMarket(true),
   };
 }

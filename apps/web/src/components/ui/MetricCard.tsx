@@ -1,4 +1,13 @@
-export function MetricCard({ label, value, tone = "default", hint }) {
+import type { StatusTone } from "@/types/market";
+
+type MetricCardProps = {
+  label: string;
+  value: string;
+  tone?: StatusTone;
+  hint?: string;
+};
+
+export function MetricCard({ label, value, tone = "default", hint }: MetricCardProps) {
   return (
     <article className={`metric-card metric-card--${tone}`}>
       <span className="metric-card__label">{label}</span>

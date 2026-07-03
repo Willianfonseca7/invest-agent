@@ -1,7 +1,8 @@
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
+import type { MarketOverview } from "@/types/market";
 
-export function useMarketCommentary(market) {
+export function useMarketCommentary(market: MarketOverview | null) {
   const { t } = useTranslation();
 
   const commentary = useMemo(() => {
@@ -24,7 +25,7 @@ export function useMarketCommentary(market) {
 
     if (!summary && !details) return null;
 
-    const parts = [];
+    const parts: string[] = [];
 
     if (summary) parts.push(summary);
     if (details && details !== summary) parts.push(details);

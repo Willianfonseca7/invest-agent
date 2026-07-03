@@ -12,7 +12,18 @@ import { useTranslation } from "react-i18next";
 import { SectionCard } from "@/components/ui/SectionCard";
 import { formatNumber } from "@/utils/format";
 
-function calculateRSISequence(prices, period = 14) {
+type RsiChartPoint = {
+  candle: number;
+  rsi5m: number | null;
+  rsi1h: number | null;
+  overbought: number;
+  oversold: number;
+};
+
+function calculateRSISequence(
+  prices: number[],
+  period = 14
+): Array<number | null> {
   if (!Array.isArray(prices) || prices.length <= period) {
     return prices.map(() => null);
   }
@@ -63,7 +74,7 @@ function calculateRSISequence(prices, period = 14) {
   return rsiSeries;
 }
 
-function buildRsiChartData(closes5m, closes1h) {
+function buildRsiChartData(closes5m: number[], closes1h: number[]): RsiChartPoint[] {
   const rsi5mSeries = calculateRSISequence(closes5m, 14);
   const rsi1hSeries = calculateRSISequence(closes1h, 14);
 
@@ -78,7 +89,15 @@ function buildRsiChartData(closes5m, closes1h) {
   }));
 }
 
-export function MarketRsiChart({ closes5m = [], closes1h = [] }) {
+type MarketRsiChartProps = {
+  closes5m?: number[];
+  closes1h?: number[];
+};
+
+export function MarketRsiChart({
+  closes5m = [],
+  closes1h = []
+}: MarketRsiChartProps) {
   const { t } = useTranslation();
 
   if (
@@ -108,7 +127,7 @@ export function MarketRsiChart({ closes5m = [], closes1h = [] }) {
               tickFormatter={(value) => `${value}`}
             />
             <Tooltip
-              formatter={(value, name) => [formatNumber(value), name]}
+              formatter={(value, name) => [formatNumber(Number(value)), name]}
               labelFormatter={(label) => t("charts.candle", { number: label })}
             />
 

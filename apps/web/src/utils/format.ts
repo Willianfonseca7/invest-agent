@@ -1,4 +1,4 @@
-export function formatNumber(value, digits = 2) {
+export function formatNumber(value: number | null | undefined, digits = 2) {
   if (value === null || value === undefined || Number.isNaN(Number(value))) {
     return "--";
   }
@@ -9,7 +9,7 @@ export function formatNumber(value, digits = 2) {
   });
 }
 
-export function formatCurrency(value) {
+export function formatCurrency(value: number | null | undefined) {
   if (value === null || value === undefined || Number.isNaN(Number(value))) {
     return "--";
   }
@@ -21,7 +21,7 @@ export function formatCurrency(value) {
   }).format(Number(value));
 }
 
-export function formatPercent(value, digits = 2) {
+export function formatPercent(value: number | null | undefined, digits = 2) {
   if (value === null || value === undefined || Number.isNaN(Number(value))) {
     return "--";
   }
