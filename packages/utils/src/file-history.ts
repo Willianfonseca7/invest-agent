@@ -51,6 +51,7 @@ export async function writeHistoryFile(items: SignalHistoryItem[]): Promise<void
     return;
   }
 
+  await fs.mkdir(DATA_DIR, { recursive: true });
   await fs.writeFile(HISTORY_FILE_PATH, JSON.stringify(items, null, 2), "utf-8");
 }
 
