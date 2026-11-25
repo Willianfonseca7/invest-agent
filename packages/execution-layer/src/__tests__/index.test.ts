@@ -17,7 +17,8 @@ vi.mock("@invest-agent/utils", () => ({
 
 describe("ExecutionLayer", () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    vi.resetAllMocks();
+    vi.mocked(getOpenPosition).mockResolvedValue(null);
   });
 
   it("persists a position after a paper buy execution", async () => {
@@ -97,6 +98,40 @@ describe("ExecutionLayer", () => {
     expect(exchange.createMarketSell).not.toHaveBeenCalled();
     expect(vi.mocked(removeOpenPosition)).toHaveBeenCalledWith("BTCUSDT");
     expect(vi.mocked(appendTradeLedgerItem)).toHaveBeenCalledTimes(1);
+  });
+  it("rejects repeated buys and sells based on persisted position state", async () => {
+    const exchange = { getTicker: vi.fn().mockResolvedValue({ price: 100 }), createMarketBuy: vi.fn(), createMarketSell: vi.fn() };
+    const layer = new ExecutionLayer(exchange, "test");
+    const buy = { symbol: "DUPUSDT", side: "BUY" as const, quoteOrderQty: 100 };
+    await layer.execute(buy);
+    const position = vi.mocked(saveOpenPosition).mock.calls[0][0];
+    vi.mocked(getOpenPosition).mockResolvedValue(position);
+    await expect(layer.execute(buy)).rejects.toThrow("Position already exists");
+    const sell = { symbol: buy.symbol, side: "SELL" as const, quantity: position.quantity };
+    await layer.execute(sell);
+    vi.mocked(getOpenPosition).mockResolvedValue(null);
+    await expect(layer.execute(sell)).rejects.toThrow("No open position");
+    expect(appendTradeLedgerItem).toHaveBeenCalledTimes(2);
+    expect(exchange.getTicker).toHaveBeenCalledTimes(2);
+  });
+  it("rejects overlapping executions within the process", async () => {
+    const exchange = { getTicker: vi.fn().mockResolvedValue({ price: 100 }), createMarketBuy: vi.fn(), createMarketSell: vi.fn() };
+    const first = new ExecutionLayer(exchange, "test");
+    const second = new ExecutionLayer(exchange, "test");
+    const intent = { symbol: "LOCKUSDT", side: "BUY" as const, quoteOrderQty: 100 };
+    const pending = first.execute(intent);
+    await expect(second.execute(intent)).rejects.toThrow("pending or uncertain");
+    await pending;
+    expect(saveOpenPosition).toHaveBeenCalledTimes(1);
+  });
+  it("blocks retries after a potentially partial persistence failure", async () => {
+    const exchange = { getTicker: vi.fn().mockResolvedValue({ price: 100 }), createMarketBuy: vi.fn(), createMarketSell: vi.fn() };
+    const layer = new ExecutionLayer(exchange, "test");
+    const intent = { symbol: "FAILUSDT", side: "BUY" as const, quoteOrderQty: 100 };
+    vi.mocked(appendTradeLedgerItem).mockRejectedValueOnce(new Error("ledger unavailable"));
+    await expect(layer.execute(intent)).rejects.toThrow("ledger unavailable");
+    await expect(layer.execute(intent)).rejects.toThrow("pending or uncertain");
+    expect(saveOpenPosition).toHaveBeenCalledTimes(1);
   });
   it.each(["live", "simulation"] as const)("blocks %s before side effects", async (mode) => {
     const exchange = { getTicker: vi.fn(), createMarketBuy: vi.fn(), createMarketSell: vi.fn() };
