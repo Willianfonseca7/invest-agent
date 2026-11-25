@@ -11,3 +11,8 @@ All phases pending. Each PR requires review, relevant tests, rollback plan and e
 7. Validation & Deployment: backtesting without lookahead, paper trading with fees/slippage, recovery drills, load tests and security review. Cloud only after cost approval; live trading excluded.
 
 Rollback: keep each phase independently revertible; additive migrations with tested backup/restore; disable new features by default until validated. No destructive rollback of ledger or audit data.
+
+## Approved refinements
+- Foundation: follow docs/execution-safety.md; durable idempotency, atomic portfolio revision and financial reconciliation remain pending. No runtime safety claim from documentation.
+- Multi-Agent and Intelligence: deterministic roles first; shared evidence, event-driven LLM calls, EUR 5 monthly application budget and independent Clara verification. Test budget exhaustion and strategy promotion gates.
+- Command Center: add financial control metrics (realized PnL, fees, operating expenses, token spend, cost coverage, reserves); share reusable UI and domain services with Office View. Initial paper capital EUR 100; no forced trading or automatic capital increases.
