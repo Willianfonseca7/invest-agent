@@ -6,15 +6,6 @@ type BinanceTickerResponse = {
   price: string;
 };
 
-type BinanceOrderResponse = {
-  orderId: number;
-  symbol: string;
-  side: string;
-  status: string;
-  executedQty: string;
-  cummulativeQuoteQty: string;
-};
-
 type BinanceBalanceEntry = {
   asset: string;
   free: string;
@@ -96,61 +87,16 @@ export class BinanceAdapter {
   }
 
   async createMarketBuy(
-    symbol: string,
-    quoteOrderQty: number
+    _symbol: string,
+    _quoteOrderQty: number
   ): Promise<{ orderId: string; executedPrice: number; quantity: number }> {
-    const query = this.buildSignedQuery({
-      symbol,
-      side: "BUY",
-      type: "MARKET",
-      quoteOrderQty: quoteOrderQty.toFixed(2),
-    });
-    const res = await fetch(`${this.baseUrl}/api/v3/order`, {
-      method: "POST",
-      headers: {
-        "X-MBX-APIKEY": this.apiKey,
-        "Content-Type": "application/x-www-form-urlencoded",
-      },
-      body: query,
-    });
-    if (!res.ok) {
-      const err = await res.text();
-      throw new Error(`Binance BUY failed: ${res.status} - ${err}`);
-    }
-    const data = (await res.json()) as BinanceOrderResponse;
-    const quantity = Number(data.executedQty);
-    const spent = Number(data.cummulativeQuoteQty);
-    const executedPrice = quantity > 0 ? spent / quantity : 0;
-    return { orderId: String(data.orderId), executedPrice, quantity };
+    throw new Error("Exchange order submission is disabled in the v2 MVP");
   }
 
   async createMarketSell(
-    symbol: string,
-    quantity: number
+    _symbol: string,
+    _quantity: number
   ): Promise<{ orderId: string; executedPrice: number }> {
-    const qty = Number(quantity.toFixed(5));
-    const query = this.buildSignedQuery({
-      symbol,
-      side: "SELL",
-      type: "MARKET",
-      quantity: String(qty),
-    });
-    const res = await fetch(`${this.baseUrl}/api/v3/order`, {
-      method: "POST",
-      headers: {
-        "X-MBX-APIKEY": this.apiKey,
-        "Content-Type": "application/x-www-form-urlencoded",
-      },
-      body: query,
-    });
-    if (!res.ok) {
-      const err = await res.text();
-      throw new Error(`Binance SELL failed: ${res.status} - ${err}`);
-    }
-    const data = (await res.json()) as BinanceOrderResponse;
-    const executedQty = Number(data.executedQty);
-    const received = Number(data.cummulativeQuoteQty);
-    const executedPrice = executedQty > 0 ? received / executedQty : 0;
-    return { orderId: String(data.orderId), executedPrice };
+    throw new Error("Exchange order submission is disabled in the v2 MVP");
   }
 }

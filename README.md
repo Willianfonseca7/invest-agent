@@ -135,7 +135,7 @@ Das Dashboard ist unter `http://localhost:4173` erreichbar. Alle Anfragen an `/a
 | `BINANCE_API_KEY` | Binance API-Schlüssel | |
 | `BINANCE_API_SECRET` | Binance API-Secret | |
 | `BINANCE_TESTNET` | Testnet verwenden | `true` |
-| `EXECUTION_MODE` | `simulation` oder `live` | `simulation` |
+| `EXECUTION_MODE` | `simulation` oder `test` | `simulation` |
 | `TRADE_AMOUNT_USDT` | Handelsbetrag pro Position in USDT | `50` |
 | `MAX_OPEN_TRADES` | Maximale offene Positionen | `2` |
 | `STOP_LOSS_PCT` | Stop-Loss-Prozentsatz | `0.03` |
@@ -144,7 +144,7 @@ Das Dashboard ist unter `http://localhost:4173` erreichbar. Alle Anfragen an `/a
 | `UPSTASH_REDIS_REST_TOKEN` | Redis-Token für Produktion | |
 | `PORT` | API-Port | `3001` |
 
-Im Modus `simulation` werden Signale berechnet und gespeichert, aber keine echten Aufträge bei Binance platziert. Im Modus `live` werden echte Aufträge ausgeführt.
+Im Modus `simulation` werden Signale berechnet und gespeichert, aber keine echten Aufträge bei Binance platziert. Im Modus `test` werden ausschließlich virtuelle Aufträge ausgeführt. `live` ist im v2-MVP gesperrt.
 
 ---
 
@@ -163,19 +163,13 @@ npx tsc -p apps/api/tsconfig.json --noEmit    TypeScript-Prüfung der API
 
 ## Sicherheitshinweise
 
-Beim Erstellen eines Binance-API-Schlüssels für den Live-Betrieb sollten folgende Einschränkungen gesetzt werden:
-
-- Nur "Spot Trading" aktivieren
-- Auszahlungen deaktivieren
-- IP-Beschränkung auf den Server setzen
-
-So kann der Schlüssel auch im Falle eines Lecks keinen finanziellen Schaden verursachen.
+Im v2-MVP sind Börsenaufträge gesperrt. Keine Live-Handelsschlüssel verwenden.
 
 ---
 
 ## Geplante Erweiterungen
 
-- Wechsel von Binance Testnet auf Produktionsumgebung für den echten Handelsbetrieb
+- Paper Trading für Kryptowährungen und Aktien
 - Erweiterung um weitere Handelspaare
 - Benachrichtigungen bei Signalen per Telegram oder E-Mail
 - Erweitertes Risikomanagement mit dynamischen Stop-Loss-Levels

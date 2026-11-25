@@ -2,6 +2,9 @@ import { ExecutionMode } from "@invest-agent/shared-types";
 
 const VALID_MODES: ExecutionMode[] = ["simulation", "test", "live"];
 const rawMode = process.env.EXECUTION_MODE ?? "simulation";
+if (rawMode === "live") {
+  throw new Error("Live trading is disabled in the v2 MVP");
+}
 const executionMode = VALID_MODES.includes(rawMode as ExecutionMode)
   ? (rawMode as ExecutionMode)
   : "simulation";

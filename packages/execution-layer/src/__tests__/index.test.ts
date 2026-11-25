@@ -54,9 +54,9 @@ describe("ExecutionLayer", () => {
     });
   });
 
-  it("removes the stored position after a live sell execution", async () => {
+  it("removes the stored position after a paper sell execution", async () => {
     const exchange = {
-      getTicker: vi.fn(),
+      getTicker: vi.fn().mockResolvedValue({ symbol: "BTCUSDT", price: 25500 }),
       createMarketBuy: vi.fn(),
       createMarketSell: vi.fn().mockResolvedValue({
         orderId: "sell-1",
@@ -72,7 +72,7 @@ describe("ExecutionLayer", () => {
       openedAt: 1
     });
 
-    const executionLayer = new ExecutionLayer(exchange, "live");
+    const executionLayer = new ExecutionLayer(exchange, "test");
     const result = await executionLayer.execute({
       symbol: "BTCUSDT",
       side: "SELL",
@@ -83,7 +83,7 @@ describe("ExecutionLayer", () => {
     expect(result).toMatchObject({
       symbol: "BTCUSDT",
       side: "SELL",
-      mode: "live",
+      mode: "test",
       trigger: "TAKE_PROFIT",
       orderId: "sell-1",
       executedPrice: 25500,
@@ -95,5 +95,13 @@ describe("ExecutionLayer", () => {
     });
     expect(vi.mocked(removeOpenPosition)).toHaveBeenCalledWith("BTCUSDT");
     expect(vi.mocked(appendTradeLedgerItem)).toHaveBeenCalledTimes(1);
+  });
+  it.each(["live", "simulation"] as const)("blocks %s before side effects", async (mode) => {
+    const exchange = { getTicker: vi.fn(), createMarketBuy: vi.fn(), createMarketSell: vi.fn() };
+    const layer = new ExecutionLayer(exchange, mode);
+    await expect(layer.execute({ symbol: "BTCUSDT", side: "BUY", quoteOrderQty: 250 })).rejects.toThrow("Only paper trading");
+    await expect(layer.execute({ symbol: "BTCUSDT", side: "SELL", quantity: 0.01 })).rejects.toThrow("Only paper trading");
+    for (const fn of Object.values(exchange)) expect(fn).not.toHaveBeenCalled();
+    for (const fn of [getOpenPosition, saveOpenPosition, removeOpenPosition, appendTradeLedgerItem]) expect(fn).not.toHaveBeenCalled();
   });
 });

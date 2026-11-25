@@ -63,14 +63,14 @@ export class ExecutionLayer {
   ) {}
 
   async execute(intent: ExecutionOrderIntent): Promise<ExecutionResult> {
+    if (this.mode !== "test") {
+      throw new Error("Only paper trading execution is permitted in the v2 MVP");
+    }
     const executedAt = Date.now();
     const trigger = intent.trigger ?? null;
 
     if (intent.side === "BUY") {
-      const result =
-        this.mode === "live"
-          ? await this.exchange.createMarketBuy(intent.symbol, intent.quoteOrderQty)
-          : await this.simulateBuy(intent.symbol, intent.quoteOrderQty);
+      const result = await this.simulateBuy(intent.symbol, intent.quoteOrderQty);
       const position = buildBuyPosition(intent.symbol, result);
       await saveOpenPosition(position);
 
@@ -94,10 +94,7 @@ export class ExecutionLayer {
     }
 
     const openPosition = await getOpenPosition(intent.symbol);
-    const result =
-      this.mode === "live"
-        ? await this.exchange.createMarketSell(intent.symbol, intent.quantity)
-        : await this.simulateSell(intent.symbol, intent.quantity);
+    const result = await this.simulateSell(intent.symbol, intent.quantity);
     await removeOpenPosition(intent.symbol);
 
     const quantity = roundQuantity(intent.quantity);
