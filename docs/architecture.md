@@ -21,3 +21,12 @@ Command Center for portfolio, risk, approvals, costs and audit. Modern isometric
 
 ## Open decisions
 Equities provider, initial capital/currency and universe, persistence migration, deployment and concrete resource limits require validation. No infrastructure or API purchases authorized by this document.
+
+## Engineering boundaries and operational finance
+Keep React presentation, layouts, reusable components, feature hooks, API services, state and domain rules separate. Office and Command Center share domain contracts and services. Use pragmatic TypeScript with runtime validation at trust boundaries; avoid unnecessary abstractions and duplicated logic.
+
+Initial paper capital EUR 100, monthly OpenAI budget EUR 5. Track realized net trading PnL after fees/slippage, actual operating expenses, token usage, cost coverage, reserves and net result separately from unrealized PnL. Break-even is a KPI, not a trade trigger or forecast. EUR 5 profit on EUR 100 requires 5% monthly before operating expenses; no guaranteed return. Additional capital and budget increases require owner approval. Paper profits cannot pay real invoices.
+
+Use deterministic scanning, technical analysis, portfolio, risk, execution and auditing. CEO, Research and Strategy may call LLMs on demand with shared cached evidence, bounded context, deduplication and centralized budget reservation. Proposed allocation: Research EUR 2, Strategy EUR 1.50, CEO EUR 0.50, reserve EUR 1; adjustable within approved total. Account for currency conversion and uncertain usage conservatively. Suspend LLM calls when budget is exhausted; deterministic safety remains active.
+
+Clara independently verifies versioned strategy proposals against reproducible historical and out-of-sample evidence, fees, slippage, benchmarks, drawdown and overfitting checks. Learning means statistical evaluation and proposals, not automatic model training or self-modification. Owner approval required before promotion.
