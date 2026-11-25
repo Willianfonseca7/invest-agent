@@ -32,6 +32,7 @@ import {
   writeWorkerRuntimeSnapshot
 } from "@invest-agent/utils";
 
+function startHealthServer(): void {
 const PORT = Number(process.env.PORT) || 8080;
 http
   .createServer((_req, res) => {
@@ -39,6 +40,7 @@ http
     res.end(JSON.stringify({ ok: true, service: "worker", mode: config.executionMode }));
   })
   .listen(PORT);
+}
 
 const binance = new BinanceAdapter();
 const executionLayer = new ExecutionLayer(binance, config.executionMode);
@@ -289,8 +291,7 @@ async function checkRiskLimits(): Promise<number> {
 
 async function processSymbol(
   symbol: string,
-  capitalContext: RuntimeCapitalContext,
-  openPositionsCount: number
+  capitalContext: RuntimeCapitalContext
 ): Promise<SymbolProcessingResult> {
   const [candles5m, candles1h] = await Promise.all([
     binance.getCandles(symbol, "5m", 50),
@@ -384,7 +385,7 @@ async function processSymbol(
     throw new Error(`Position already exists for ${symbol}; aborting cycle`);
   }
   const currentContext = await buildRuntimeCapitalContext(currentPositions);
-  openPositionsCount = currentPositions.length;
+  const openPositionsCount = currentPositions.length;
   const riskResult = evaluateRisk({
     symbol,
     requestedCapital: budget,
@@ -473,7 +474,7 @@ async function processSymbol(
   };
 }
 
-async function runCycle(): Promise<void> {
+export async function runCycle(): Promise<void> {
   const cycleId = `cycle-${Date.now()}`;
   const startedAt = Date.now();
   const accumulator: CycleAccumulator = {
@@ -524,7 +525,7 @@ async function runCycle(): Promise<void> {
   for (const symbol of config.trading.symbols) {
     symbolsProcessed += 1;
     try {
-      const result = await processSymbol(symbol, capitalContext, openPositions.length);
+      const result = await processSymbol(symbol, capitalContext);
       updateCycleAccumulator(accumulator, result);
     } catch (error) {
       accumulator.errorCount += 1;
@@ -668,4 +669,7 @@ async function start(): Promise<void> {
   }, intervalMs);
 }
 
-start();
+if (require.main === module) {
+  startHealthServer();
+  void start();
+}
