@@ -32,6 +32,7 @@ import {
   writeWorkerRuntimeSnapshot
 } from "@invest-agent/utils";
 
+function startHealthServer(): void {
 const PORT = Number(process.env.PORT) || 8080;
 http
   .createServer((_req, res) => {
@@ -39,6 +40,7 @@ http
     res.end(JSON.stringify({ ok: true, service: "worker", mode: config.executionMode }));
   })
   .listen(PORT);
+}
 
 const binance = new BinanceAdapter();
 const executionLayer = new ExecutionLayer(binance, config.executionMode);
@@ -289,8 +291,7 @@ async function checkRiskLimits(): Promise<number> {
 
 async function processSymbol(
   symbol: string,
-  capitalContext: RuntimeCapitalContext,
-  openPositionsCount: number
+  capitalContext: RuntimeCapitalContext
 ): Promise<SymbolProcessingResult> {
   const [candles5m, candles1h] = await Promise.all([
     binance.getCandles(symbol, "5m", 50),
@@ -378,6 +379,13 @@ async function processSymbol(
     };
   }
 
+  // Refresh persisted state immediately before a buy; retain the original cycle allocation.
+  const currentPositions = await getAllOpenPositions();
+  if (currentPositions.some((position) => position.symbol === symbol)) {
+    throw new Error(`Position already exists for ${symbol}; aborting cycle`);
+  }
+  const currentContext = await buildRuntimeCapitalContext(currentPositions);
+  const openPositionsCount = currentPositions.length;
   const riskResult = evaluateRisk({
     symbol,
     requestedCapital: budget,
@@ -389,7 +397,7 @@ async function processSymbol(
     maxDailyLossPct: MAX_DAILY_LOSS_PCT,
     cooldownMs: RISK_COOLDOWN_MS,
     consecutiveLossLimit: CONSECUTIVE_LOSS_LIMIT,
-    capital: capitalContext.portfolio.capital,
+    capital: currentContext.portfolio.capital,
     recentTrades: await readTradeLedger(),
     now: Date.now()
   });
@@ -466,7 +474,7 @@ async function processSymbol(
   };
 }
 
-async function runCycle(): Promise<void> {
+export async function runCycle(): Promise<void> {
   const cycleId = `cycle-${Date.now()}`;
   const startedAt = Date.now();
   const accumulator: CycleAccumulator = {
@@ -513,15 +521,19 @@ async function runCycle(): Promise<void> {
     });
   }
 
+  let symbolsProcessed = 0;
   for (const symbol of config.trading.symbols) {
+    symbolsProcessed += 1;
     try {
-      const result = await processSymbol(symbol, capitalContext, openPositions.length);
+      const result = await processSymbol(symbol, capitalContext);
       updateCycleAccumulator(accumulator, result);
     } catch (error) {
       accumulator.errorCount += 1;
       accumulator.lastError =
         error instanceof Error ? error.message : String(error);
-      logger.error("symbol processing failed", error, { symbol });
+      logger.error("symbol processing failed; aborting cycle", error, { symbol });
+      // A failed execution may have persisted only part of its state.
+      break;
     }
   }
 
@@ -533,7 +545,7 @@ async function runCycle(): Promise<void> {
     finishedAt: Date.now(),
     durationMs: Date.now() - startedAt,
     status: accumulator.errorCount > 0 ? "ERROR" : "SUCCESS",
-    symbolsProcessed: config.trading.symbols.length,
+    symbolsProcessed,
     buySignals: accumulator.buySignals,
     sellSignals: accumulator.sellSignals,
     holdSignals: accumulator.holdSignals,
@@ -657,4 +669,7 @@ async function start(): Promise<void> {
   }, intervalMs);
 }
 
-start();
+if (require.main === module) {
+  startHealthServer();
+  void start();
+}
