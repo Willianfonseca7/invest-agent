@@ -53,6 +53,10 @@ function buildTradeLedgerEntry(result: ExecutionResult): TradeLedgerEntry {
   };
 }
 
+// Shared within this process; distributed locking is a separate requirement.
+const pendingSymbols = new Set<string>();
+const uncertainSymbols = new Set<string>();
+
 export class ExecutionLayer {
   constructor(
     private readonly exchange: Pick<
@@ -66,12 +70,27 @@ export class ExecutionLayer {
     if (this.mode !== "test") {
       throw new Error("Only paper trading execution is permitted in the v2 MVP");
     }
+    if (pendingSymbols.has(intent.symbol) || uncertainSymbols.has(intent.symbol)) {
+      throw new Error(`Execution pending or uncertain for ${intent.symbol}`);
+    }
+    pendingSymbols.add(intent.symbol);
+    try {
+      return await this.executePaper(intent);
+    } finally {
+      pendingSymbols.delete(intent.symbol);
+    }
+  }
+
+  private async executePaper(intent: ExecutionOrderIntent): Promise<ExecutionResult> {
+    const openPosition = await getOpenPosition(intent.symbol);
     const executedAt = Date.now();
     const trigger = intent.trigger ?? null;
 
     if (intent.side === "BUY") {
+      if (openPosition) throw new Error("Position already exists");
       const result = await this.simulateBuy(intent.symbol, intent.quoteOrderQty);
       const position = buildBuyPosition(intent.symbol, result);
+      uncertainSymbols.add(intent.symbol);
       await saveOpenPosition(position);
 
       const executionResult: ExecutionResult = {
@@ -90,11 +109,14 @@ export class ExecutionLayer {
       };
 
       await appendTradeLedgerItem(buildTradeLedgerEntry(executionResult));
+      uncertainSymbols.delete(intent.symbol);
       return executionResult;
     }
 
-    const openPosition = await getOpenPosition(intent.symbol);
+    if (!openPosition) throw new Error("No open position to sell");
+    if (intent.quantity !== openPosition.quantity) throw new Error("Only full position exits are supported");
     const result = await this.simulateSell(intent.symbol, intent.quantity);
+    uncertainSymbols.add(intent.symbol);
     await removeOpenPosition(intent.symbol);
 
     const quantity = roundQuantity(intent.quantity);
@@ -127,6 +149,7 @@ export class ExecutionLayer {
     };
 
     await appendTradeLedgerItem(buildTradeLedgerEntry(executionResult));
+    uncertainSymbols.delete(intent.symbol);
     return executionResult;
   }
 
