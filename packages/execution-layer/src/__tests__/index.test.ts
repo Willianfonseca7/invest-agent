@@ -45,6 +45,9 @@ describe("ExecutionLayer", () => {
       quoteAmount: 250,
       closedPosition: false
     });
+    expect(result.orderId).toMatch(/^paper-buy-\d+$/);
+    expect(exchange.createMarketBuy).not.toHaveBeenCalled();
+    expect(exchange.createMarketSell).not.toHaveBeenCalled();
     expect(vi.mocked(saveOpenPosition)).toHaveBeenCalledTimes(1);
     expect(vi.mocked(appendTradeLedgerItem)).toHaveBeenCalledTimes(1);
     expect(vi.mocked(saveOpenPosition).mock.calls[0]?.[0]).toMatchObject({
@@ -58,10 +61,7 @@ describe("ExecutionLayer", () => {
     const exchange = {
       getTicker: vi.fn().mockResolvedValue({ symbol: "BTCUSDT", price: 25500 }),
       createMarketBuy: vi.fn(),
-      createMarketSell: vi.fn().mockResolvedValue({
-        orderId: "sell-1",
-        executedPrice: 25500
-      })
+      createMarketSell: vi.fn()
     } as unknown as BinanceAdapter;
     vi.mocked(getOpenPosition).mockResolvedValue({
       symbol: "BTCUSDT",
@@ -85,7 +85,7 @@ describe("ExecutionLayer", () => {
       side: "SELL",
       mode: "test",
       trigger: "TAKE_PROFIT",
-      orderId: "sell-1",
+      orderId: expect.stringMatching(/^paper-sell-\d+$/),
       executedPrice: 25500,
       quantity: 0.01,
       quoteAmount: 255,
@@ -93,6 +93,8 @@ describe("ExecutionLayer", () => {
       realizedPnl: 5,
       realizedPnlPct: 0.02
     });
+    expect(exchange.createMarketBuy).not.toHaveBeenCalled();
+    expect(exchange.createMarketSell).not.toHaveBeenCalled();
     expect(vi.mocked(removeOpenPosition)).toHaveBeenCalledWith("BTCUSDT");
     expect(vi.mocked(appendTradeLedgerItem)).toHaveBeenCalledTimes(1);
   });
