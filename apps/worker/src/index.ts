@@ -378,6 +378,13 @@ async function processSymbol(
     };
   }
 
+  // Refresh persisted state immediately before a buy; retain the original cycle allocation.
+  const currentPositions = await getAllOpenPositions();
+  if (currentPositions.some((position) => position.symbol === symbol)) {
+    throw new Error(`Position already exists for ${symbol}; aborting cycle`);
+  }
+  const currentContext = await buildRuntimeCapitalContext(currentPositions);
+  openPositionsCount = currentPositions.length;
   const riskResult = evaluateRisk({
     symbol,
     requestedCapital: budget,
@@ -389,7 +396,7 @@ async function processSymbol(
     maxDailyLossPct: MAX_DAILY_LOSS_PCT,
     cooldownMs: RISK_COOLDOWN_MS,
     consecutiveLossLimit: CONSECUTIVE_LOSS_LIMIT,
-    capital: capitalContext.portfolio.capital,
+    capital: currentContext.portfolio.capital,
     recentTrades: await readTradeLedger(),
     now: Date.now()
   });
@@ -513,7 +520,9 @@ async function runCycle(): Promise<void> {
     });
   }
 
+  let symbolsProcessed = 0;
   for (const symbol of config.trading.symbols) {
+    symbolsProcessed += 1;
     try {
       const result = await processSymbol(symbol, capitalContext, openPositions.length);
       updateCycleAccumulator(accumulator, result);
@@ -521,7 +530,9 @@ async function runCycle(): Promise<void> {
       accumulator.errorCount += 1;
       accumulator.lastError =
         error instanceof Error ? error.message : String(error);
-      logger.error("symbol processing failed", error, { symbol });
+      logger.error("symbol processing failed; aborting cycle", error, { symbol });
+      // A failed execution may have persisted only part of its state.
+      break;
     }
   }
 
@@ -533,7 +544,7 @@ async function runCycle(): Promise<void> {
     finishedAt: Date.now(),
     durationMs: Date.now() - startedAt,
     status: accumulator.errorCount > 0 ? "ERROR" : "SUCCESS",
-    symbolsProcessed: config.trading.symbols.length,
+    symbolsProcessed,
     buySignals: accumulator.buySignals,
     sellSignals: accumulator.sellSignals,
     holdSignals: accumulator.holdSignals,
