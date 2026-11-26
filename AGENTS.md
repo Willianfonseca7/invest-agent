@@ -18,3 +18,7 @@ Read docs/architecture.md and docs/roadmap.md before architectural changes. Appr
 - PostgreSQL is the target financial source of truth; Redis is auxiliary and JSON is legacy/import or fixture only. No automatic fallback for financial writes. Use exact decimal arithmetic and explicit currency/asset precision and rounding; no floating-point monetary arithmetic in new financial paths.
 - Complete foundation and reproducible backtesting before agent expansion. Implement crypto first, retain equities and both UI modes in product scope. Nine visible roles do not require nine autonomous processes; reuse deterministic modules and one bounded LLM gateway.
 - Prioritize dependency audit and tested kill switch. No migration, paid infrastructure or real orders without separate authorization.
+
+## Engineering workflow
+
+Follow [docs/engineering-workflow.md](docs/engineering-workflow.md) for the three engineering agents, independent QA and quality review, CI and owner approval. Use Clean Code, DRY, KISS, YAGNI, separation of concerns, a single source of truth, least privilege and security by design. Prefer small, justified changes, reuse and risk-proportionate tests. Agents may not change their own rules or expand their permissions.
