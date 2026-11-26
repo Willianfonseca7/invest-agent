@@ -23,7 +23,7 @@ jobs:
 
       - run: npm --workspace apps/worker run build
 
-      - run: node apps/worker/dist/index.js
+      - run: node scripts/safe-artifact.cjs start worker
         env:
           EXECUTION_MODE: ${{ secrets.EXECUTION_MODE }}
           BINANCE_API_KEY: ${{ secrets.BINANCE_API_KEY }}

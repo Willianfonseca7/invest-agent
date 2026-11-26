@@ -1,12 +1,13 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { Redis } from "@upstash/redis";
-import { OpenPosition } from "@invest-agent/shared-types";
+import type { OpenPosition } from "@invest-agent/shared-types";
+import { FinancialStateUnavailableError, readLocalJson, redisConfigured, validatePositions } from "./financial-state";
 
 const POSITIONS_KEY = "invest-agent:open-positions";
 
 function buildRedisClient(): Redis | null {
-  if (!process.env.UPSTASH_REDIS_REST_URL || !process.env.UPSTASH_REDIS_REST_TOKEN) {
+  if (!redisConfigured()) {
     return null;
   }
   return new Redis({
@@ -25,24 +26,26 @@ const POSITIONS_FILE = path.join(DATA_DIR, "positions.json");
 
 async function readAll(): Promise<OpenPosition[]> {
   if (redis) {
-    const data = await redis.get<OpenPosition[]>(POSITIONS_KEY);
-    return data ?? [];
+    let value: unknown;
+    try { value = await redis.get<unknown>(POSITIONS_KEY); }
+    catch { throw new FinancialStateUnavailableError("REDIS_UNAVAILABLE"); }
+    if (value === null) throw new FinancialStateUnavailableError("MISSING_STATE");
+    return validatePositions(value);
   }
-  try {
-    const content = await fs.readFile(POSITIONS_FILE, "utf-8");
-    return JSON.parse(content) as OpenPosition[];
-  } catch {
-    return [];
-  }
+  return validatePositions(await readLocalJson(POSITIONS_FILE));
 }
 
 async function writeAll(positions: OpenPosition[]): Promise<void> {
-  if (redis) {
-    await redis.set(POSITIONS_KEY, positions);
-    return;
+  try {
+    if (redis) {
+      await redis.set(POSITIONS_KEY, positions);
+      return;
+    }
+    await fs.mkdir(DATA_DIR, { recursive: true });
+    await fs.writeFile(POSITIONS_FILE, JSON.stringify(positions, null, 2), "utf-8");
+  } catch {
+    throw new FinancialStateUnavailableError("WRITE_FAILURE");
   }
-  await fs.mkdir(DATA_DIR, { recursive: true });
-  await fs.writeFile(POSITIONS_FILE, JSON.stringify(positions, null, 2), "utf-8");
 }
 
 export async function getOpenPosition(symbol: string): Promise<OpenPosition | null> {

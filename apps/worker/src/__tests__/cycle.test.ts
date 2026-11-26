@@ -1,12 +1,17 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { OpenPosition } from "@invest-agent/shared-types";
+import { FinancialStateUnavailableError } from "@invest-agent/utils";
 const state = vi.hoisted(() => ({
   positions: [] as OpenPosition[],
   execute: vi.fn(),
   decisions: vi.fn(),
   candles: vi.fn(),
   maxOpen: 2,
-  exposure: 1
+  exposure: 1,
+  ledger: vi.fn().mockResolvedValue([]),
+  positionsRead: vi.fn(),
+  snapshot: vi.fn(),
+  errorLog: vi.fn()
 }));
 vi.mock("@invest-agent/config", () => ({ config: {
   executionMode: "test",
@@ -20,21 +25,27 @@ vi.mock("@invest-agent/exchange-adapters", () => ({ BinanceAdapter: class {
 vi.mock("@invest-agent/execution-layer", () => ({ ExecutionLayer: class { execute = state.execute; } }));
 vi.mock("@invest-agent/strategy-engine", () => ({ analyzeMultiTimeframeMarket: () => ({ action: "BUY", price: 100, confidence: 1, reason: { summary: "test" } }) }));
 vi.mock("@invest-agent/utils", () => ({
-  getAllOpenPositions: async () => [...state.positions],
+  FinancialStateUnavailableError: class extends Error {
+    constructor(readonly code: string) { super("Financial state is unavailable"); }
+  },
+  getAllOpenPositions: async () => { await state.positionsRead(); return [...state.positions]; },
   getOpenPosition: async (symbol: string) => state.positions.find(p => p.symbol === symbol),
-  readTradeLedger: async () => [],
+  readTradeLedger: state.ledger,
   appendRiskDecision: state.decisions,
   appendHistoryItem: vi.fn(),
   appendOperationalAlert: vi.fn(),
-  writeWorkerRuntimeSnapshot: vi.fn(),
-  logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn() }
+  writeWorkerRuntimeSnapshot: state.snapshot,
+  logger: { info: vi.fn(), warn: vi.fn(), error: state.errorLog }
 }));
-import { runCycle } from "../index";
+import { executeCycle, runCycle } from "../index";
 
 describe("worker capital consistency", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     state.positions = [];
+    state.ledger.mockReset().mockResolvedValue([]);
+    state.positionsRead.mockReset();
+    state.snapshot.mockReset();
     state.execute.mockReset().mockImplementation(async ({ symbol, quoteOrderQty }) => {
       state.positions.push({ symbol, side: "BUY", entryPrice: 100, quantity: quoteOrderQty / 100, orderId: symbol, openedAt: 1 });
       return { orderId: symbol, executedPrice: 100, quantity: quoteOrderQty / 100, quoteAmount: quoteOrderQty };
@@ -56,9 +67,40 @@ describe("worker capital consistency", () => {
     expect(state.execute.mock.calls[1][0].quoteOrderQty).toBe(100);
     expect(state.positions.reduce((sum, p) => sum + p.entryPrice * p.quantity, 0)).toBe(1000);
   });
+  it("blocks protective exits when ledger is unavailable and recovers on a valid next cycle", async () => {
+    state.positions = [{ symbol: "BTCUSDT", side: "BUY", entryPrice: 110, quantity: 1, orderId: "p", openedAt: 1 }];
+    state.ledger.mockRejectedValueOnce(new Error("storage detail"));
+    await expect(runCycle()).rejects.toThrow("storage detail");
+    expect(state.execute).not.toHaveBeenCalled();
+    expect(state.positionsRead).not.toHaveBeenCalled();
+    state.execute.mockImplementationOnce(async () => { state.positions = []; return { orderId: "sell", executedPrice: 100, quantity: 1, quoteAmount: 100 }; });
+    await runCycle();
+    expect(state.execute).toHaveBeenCalledWith(expect.objectContaining({ side: "SELL", trigger: "STOP_LOSS" }));
+  });
+  it("releases the cycle guard after initial snapshot failure", async () => {
+    state.snapshot.mockRejectedValueOnce(new Error("snapshot unavailable"));
+    await expect(executeCycle()).rejects.toThrow("snapshot unavailable");
+    expect(state.execute).not.toHaveBeenCalled();
+    await executeCycle();
+    expect(state.execute).toHaveBeenCalled();
+  });
+  it("reports a safe failure category when state is unavailable", async () => {
+    state.ledger.mockRejectedValueOnce(new FinancialStateUnavailableError("REDIS_UNAVAILABLE"));
+    await expect(executeCycle()).rejects.toThrow("Financial state is unavailable");
+    expect(state.execute).not.toHaveBeenCalled();
+    expect(state.errorLog).toHaveBeenCalledWith("worker cycle failed", expect.any(Error),
+      expect.objectContaining({ failureCode: "REDIS_UNAVAILABLE" }));
+  });
+  it("releases the cycle guard after final snapshot failure", async () => {
+    state.snapshot.mockResolvedValueOnce(undefined).mockRejectedValueOnce(new Error("snapshot unavailable"));
+    await expect(executeCycle()).rejects.toThrow("Worker runtime snapshot failed");
+    const firstCycleReads = state.ledger.mock.calls.length;
+    await executeCycle();
+    expect(state.ledger.mock.calls.length).toBeGreaterThan(firstCycleReads);
+  });
   it("aborts remaining symbols after an execution error", async () => {
     state.execute.mockRejectedValueOnce(new Error("partial persistence"));
-    await runCycle();
+    await expect(runCycle()).rejects.toThrow("Worker cycle failed");
     expect(state.execute).toHaveBeenCalledTimes(1);
     expect(state.candles).toHaveBeenCalledTimes(2);
   });

@@ -25,6 +25,7 @@ import {
   appendOperationalAlert,
   appendHistoryItem,
   appendRiskDecision,
+  FinancialStateUnavailableError,
   getAllOpenPositions,
   getOpenPosition,
   logger,
@@ -32,9 +33,9 @@ import {
   writeWorkerRuntimeSnapshot
 } from "@invest-agent/utils";
 
-function startHealthServer(): void {
+function startHealthServer(): http.Server {
 const PORT = Number(process.env.PORT) || 8080;
-http
+return http
   .createServer((_req, res) => {
     res.writeHead(200, { "Content-Type": "application/json" });
     res.end(JSON.stringify({ ok: true, service: "worker", mode: config.executionMode }));
@@ -489,6 +490,7 @@ export async function runCycle(): Promise<void> {
   };
 
   if (SHOULD_EXECUTE) {
+    await readTradeLedger();
     accumulator.executedSells += await checkRiskLimits();
   }
 
@@ -522,6 +524,7 @@ export async function runCycle(): Promise<void> {
   }
 
   let symbolsProcessed = 0;
+  let symbolFailure = false;
   for (const symbol of config.trading.symbols) {
     symbolsProcessed += 1;
     try {
@@ -529,10 +532,13 @@ export async function runCycle(): Promise<void> {
       updateCycleAccumulator(accumulator, result);
     } catch (error) {
       accumulator.errorCount += 1;
-      accumulator.lastError =
-        error instanceof Error ? error.message : String(error);
-      logger.error("symbol processing failed; aborting cycle", error, { symbol });
+      accumulator.lastError = "Symbol processing failed";
+      logger.error("symbol processing failed; aborting cycle", new Error("Symbol processing failed"), {
+        symbol,
+        failureCode: error instanceof FinancialStateUnavailableError ? error.code : "SYMBOL_FAILURE"
+      });
       // A failed execution may have persisted only part of its state.
+      symbolFailure = true;
       break;
     }
   }
@@ -555,9 +561,10 @@ export async function runCycle(): Promise<void> {
     errorCount: accumulator.errorCount,
     lastError: accumulator.lastError
   };
+  if (symbolFailure) throw new Error("Worker cycle failed during symbol processing");
 }
 
-async function executeCycle(): Promise<void> {
+export async function executeCycle(): Promise<void> {
   if (isCycleRunning) {
     skippedCycles += 1;
     lastCycle = {
@@ -589,15 +596,17 @@ async function executeCycle(): Promise<void> {
   }
 
   isCycleRunning = true;
-  workerStatus = "running";
-  await persistWorkerRuntimeSnapshot();
-
   try {
+    workerStatus = "running";
+    await persistWorkerRuntimeSnapshot();
     await runCycle();
     workerStatus = "idle";
   } catch (error) {
     totalErrors += 1;
     workerStatus = "error";
+    logger.error("worker cycle failed", new Error("Worker cycle failed"), {
+      failureCode: error instanceof FinancialStateUnavailableError ? error.code : "CYCLE_FAILURE"
+    });
     lastCycle = {
       cycleId: `cycle-error-${Date.now()}`,
       startedAt: Date.now(),
@@ -612,20 +621,22 @@ async function executeCycle(): Promise<void> {
       executedSells: 0,
       riskBlockedCount: 0,
       errorCount: 1,
-      lastError: error instanceof Error ? error.message : String(error)
+      lastError: "Worker cycle failed"
     };
     await createOperationalAlert({
       severity: "error",
       code: "WORKER_CYCLE_ERROR",
       message: "Worker cycle failed.",
-      metadata: {
-        error: error instanceof Error ? error.message : String(error)
-      }
     });
     throw error;
   } finally {
     isCycleRunning = false;
-    await persistWorkerRuntimeSnapshot();
+    try {
+      await persistWorkerRuntimeSnapshot();
+    } catch {
+      logger.error("worker runtime snapshot failed", new Error("Worker runtime snapshot failed"));
+      throw new Error("Worker runtime snapshot failed");
+    }
   }
 }
 
@@ -659,17 +670,21 @@ async function start(): Promise<void> {
   await executeCycle();
 
   if (intervalMs === 0) {
-    process.exit(0);
+    return;
   }
 
   setInterval(() => {
-    void executeCycle().catch((error) => {
-      logger.error("worker cycle failed", error);
+    void executeCycle().catch(() => {
+      logger.error("worker cycle failed", new Error("Worker cycle failed"));
     });
   }, intervalMs);
 }
 
 if (require.main === module) {
-  startHealthServer();
-  void start();
+  const healthServer = workerIntervalMs === 0 ? null : startHealthServer();
+  void start().catch(() => {
+    healthServer?.close();
+    logger.error("worker failed", new Error("Worker failed"));
+    process.exitCode = 1;
+  });
 }

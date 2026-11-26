@@ -5,7 +5,7 @@
     "buildCommand": "npm ci --include=dev && npm --workspace apps/worker run build"
   },
   "deploy": {
-    "startCommand": "node apps/worker/dist/index.js",
+    "startCommand": "node scripts/safe-artifact.cjs start worker",
     "restartPolicyType": "ON_FAILURE",
     "restartPolicyMaxRetries": 5
   }
