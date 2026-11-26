@@ -8,7 +8,7 @@ The private source is `Willianfonseca7/personal-ai-skills.` (including the final
 | `technical-planner` | Plan work with dependencies, acceptance checks and rollback. | `a0f6e6d82d23d6d2fb6cbb0f6df569f0e4060268` |
 | `typescript-expert` | Review TypeScript types, contracts and runtime validation. | `3f8ffa720692b83975cb14b3007800ce5d4ced49` |
 
-Installation is optional and requires authorized access to the source. The [engineering workflow](engineering-workflow.md) governs roles and approvals. Invoke skills when the task calls for them.
+Installation is optional and requires authorized access to the source. The [engineering workflow](engineering-workflow.md) governs roles and approvals. Load only the relevant skills and sections for the current task. Share compact results and point to earlier evidence when it remains valid. Keep installation project-scoped.
 
 ## Install locally
 
