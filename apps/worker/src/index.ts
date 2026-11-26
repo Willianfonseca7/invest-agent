@@ -596,47 +596,58 @@ export async function executeCycle(): Promise<void> {
   }
 
   isCycleRunning = true;
+  let cycleFailed = false;
+  let cycleFailure: unknown;
   try {
-    workerStatus = "running";
-    await persistWorkerRuntimeSnapshot();
-    await runCycle();
-    workerStatus = "idle";
-  } catch (error) {
-    totalErrors += 1;
-    workerStatus = "error";
-    logger.error("worker cycle failed", new Error("Worker cycle failed"), {
-      failureCode: error instanceof FinancialStateUnavailableError ? error.code : "CYCLE_FAILURE"
-    });
-    lastCycle = {
-      cycleId: `cycle-error-${Date.now()}`,
-      startedAt: Date.now(),
-      finishedAt: Date.now(),
-      durationMs: 0,
-      status: "ERROR",
-      symbolsProcessed: 0,
-      buySignals: 0,
-      sellSignals: 0,
-      holdSignals: 0,
-      executedBuys: 0,
-      executedSells: 0,
-      riskBlockedCount: 0,
-      errorCount: 1,
-      lastError: "Worker cycle failed"
-    };
-    await createOperationalAlert({
-      severity: "error",
-      code: "WORKER_CYCLE_ERROR",
-      message: "Worker cycle failed.",
-    });
-    throw error;
+    try {
+      workerStatus = "running";
+      await persistWorkerRuntimeSnapshot();
+      await runCycle();
+      workerStatus = "idle";
+    } catch (error) {
+      cycleFailed = true;
+      cycleFailure = error;
+      totalErrors += 1;
+      workerStatus = "error";
+      logger.error("worker cycle failed", new Error("Worker cycle failed"), {
+        failureCode: error instanceof FinancialStateUnavailableError ? error.code : "CYCLE_FAILURE"
+      });
+      lastCycle = {
+        cycleId: `cycle-error-${Date.now()}`,
+        startedAt: Date.now(),
+        finishedAt: Date.now(),
+        durationMs: 0,
+        status: "ERROR",
+        symbolsProcessed: 0,
+        buySignals: 0,
+        sellSignals: 0,
+        holdSignals: 0,
+        executedBuys: 0,
+        executedSells: 0,
+        riskBlockedCount: 0,
+        errorCount: 1,
+        lastError: "Worker cycle failed"
+      };
+      try {
+        await createOperationalAlert({
+          severity: "error",
+          code: "WORKER_CYCLE_ERROR",
+          message: "Worker cycle failed.",
+        });
+      } catch {
+        logger.error("worker operational alert failed", new Error("Worker operational alert failed"));
+      }
+    } finally {
+      try {
+        await persistWorkerRuntimeSnapshot();
+      } catch {
+        logger.error("worker runtime snapshot failed", new Error("Worker runtime snapshot failed"));
+        if (!cycleFailed) throw new Error("Worker runtime snapshot failed");
+      }
+    }
+    if (cycleFailed) throw cycleFailure;
   } finally {
     isCycleRunning = false;
-    try {
-      await persistWorkerRuntimeSnapshot();
-    } catch {
-      logger.error("worker runtime snapshot failed", new Error("Worker runtime snapshot failed"));
-      throw new Error("Worker runtime snapshot failed");
-    }
   }
 }
 

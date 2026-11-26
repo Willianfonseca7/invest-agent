@@ -11,6 +11,7 @@ const state = vi.hoisted(() => ({
   ledger: vi.fn().mockResolvedValue([]),
   positionsRead: vi.fn(),
   snapshot: vi.fn(),
+  alert: vi.fn(),
   errorLog: vi.fn()
 }));
 vi.mock("@invest-agent/config", () => ({ config: {
@@ -33,7 +34,7 @@ vi.mock("@invest-agent/utils", () => ({
   readTradeLedger: state.ledger,
   appendRiskDecision: state.decisions,
   appendHistoryItem: vi.fn(),
-  appendOperationalAlert: vi.fn(),
+  appendOperationalAlert: state.alert,
   writeWorkerRuntimeSnapshot: state.snapshot,
   logger: { info: vi.fn(), warn: vi.fn(), error: state.errorLog }
 }));
@@ -46,6 +47,7 @@ describe("worker capital consistency", () => {
     state.ledger.mockReset().mockResolvedValue([]);
     state.positionsRead.mockReset();
     state.snapshot.mockReset();
+    state.alert.mockReset();
     state.execute.mockReset().mockImplementation(async ({ symbol, quoteOrderQty }) => {
       state.positions.push({ symbol, side: "BUY", entryPrice: 100, quantity: quoteOrderQty / 100, orderId: symbol, openedAt: 1 });
       return { orderId: symbol, executedPrice: 100, quantity: quoteOrderQty / 100, quoteAmount: quoteOrderQty };
@@ -97,6 +99,70 @@ describe("worker capital consistency", () => {
     const firstCycleReads = state.ledger.mock.calls.length;
     await executeCycle();
     expect(state.ledger.mock.calls.length).toBeGreaterThan(firstCycleReads);
+  });
+  it("preserves an execution failure when the operational alert also fails", async () => {
+    const executionFailure = new Error("private execution detail");
+    state.ledger.mockRejectedValueOnce(executionFailure);
+    state.alert.mockRejectedValueOnce(new Error("private alert detail"));
+
+    await expect(executeCycle()).rejects.toBe(executionFailure);
+    expect(state.execute).not.toHaveBeenCalled();
+    expect(state.alert).toHaveBeenCalledWith(expect.objectContaining({ code: "WORKER_CYCLE_ERROR" }));
+    expect(state.errorLog).toHaveBeenCalledWith("worker operational alert failed", expect.any(Error));
+    const loggedText = state.errorLog.mock.calls.map(([message, error, context]) =>
+      `${message} ${error instanceof Error ? error.message : String(error)} ${JSON.stringify(context)}`
+    ).join(" ");
+    expect(loggedText).not.toMatch(/private execution detail|private alert detail/);
+
+    await executeCycle();
+    expect(state.execute).toHaveBeenCalled();
+  });
+  it("preserves an execution failure when the final snapshot also fails", async () => {
+    const executionFailure = new Error("private execution detail");
+    state.ledger.mockRejectedValueOnce(executionFailure);
+    state.snapshot.mockResolvedValueOnce(undefined).mockRejectedValueOnce(new Error("private snapshot detail"));
+
+    await expect(executeCycle()).rejects.toBe(executionFailure);
+    expect(state.execute).not.toHaveBeenCalled();
+    expect(state.errorLog).toHaveBeenCalledWith("worker runtime snapshot failed", expect.any(Error));
+    const loggedText = state.errorLog.mock.calls.map(([message, error, context]) =>
+      `${message} ${error instanceof Error ? error.message : String(error)} ${JSON.stringify(context)}`
+    ).join(" ");
+    expect(loggedText).not.toMatch(/private execution detail|private snapshot detail/);
+
+    await executeCycle();
+    expect(state.execute).toHaveBeenCalled();
+  });
+  it("keeps the owner guard while its final snapshot is pending and another cycle skips", async () => {
+    let releaseSnapshot: (() => void) | undefined;
+    const finalSnapshot = new Promise<void>((resolve) => { releaseSnapshot = resolve; });
+    state.snapshot.mockResolvedValueOnce(undefined).mockImplementationOnce(() => finalSnapshot);
+
+    const owner = executeCycle();
+    await vi.waitFor(() => expect(state.snapshot).toHaveBeenCalledTimes(2));
+    const ownerReads = state.ledger.mock.calls.length;
+    await executeCycle();
+    await executeCycle();
+    expect(state.ledger).toHaveBeenCalledTimes(ownerReads);
+    expect(state.execute).toHaveBeenCalledTimes(2);
+
+    releaseSnapshot?.();
+    await owner;
+    await executeCycle();
+    expect(state.ledger.mock.calls.length).toBeGreaterThan(ownerReads);
+  });
+  it("preserves an undefined execution rejection through both reporting failures", async () => {
+    state.ledger.mockRejectedValueOnce(undefined);
+    state.alert.mockRejectedValueOnce(new Error("private alert detail"));
+    state.snapshot.mockResolvedValueOnce(undefined).mockRejectedValueOnce(new Error("private snapshot detail"));
+
+    await expect(executeCycle()).rejects.toBeUndefined();
+    expect(state.execute).not.toHaveBeenCalled();
+    expect(state.errorLog).toHaveBeenCalledWith("worker operational alert failed", expect.objectContaining({ message: "Worker operational alert failed" }));
+    expect(state.errorLog).toHaveBeenCalledWith("worker runtime snapshot failed", expect.objectContaining({ message: "Worker runtime snapshot failed" }));
+
+    await executeCycle();
+    expect(state.execute).toHaveBeenCalled();
   });
   it("aborts remaining symbols after an execution error", async () => {
     state.execute.mockRejectedValueOnce(new Error("partial persistence"));
