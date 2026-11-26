@@ -14,13 +14,13 @@ Typed event-driven orchestrator; shared market data and bounded queues; normaliz
 Risk checks deterministic and fail closed; atomic reservation and current portfolio state, idempotent orders, reconciliation, kill switch, bounded retries. Human approvals authenticated, scoped, expiring, audited and revalidated. Paper fills model fees, slippage and market hours. Learning means versioned evaluation and proposals, not autonomous production code or policy changes.
 
 ## Persistence
-RAM for ephemeral states; reuse Redis only where useful. Durable transactional store required for ledger, approvals and audit; PostgreSQL candidate, not selected or provisioned. Measure queries, connections, storage and cache hits; bounded batches for noncritical telemetry, indexes and retention. Never discard evidence required to reproduce decisions. No raw chain-of-thought storage. Critical writes must be durable before acknowledgment; fail closed on unavailable persistence.
+RAM for ephemeral states; reuse Redis only where useful. Durable transactional store required for ledger, approvals and audit; PostgreSQL selected as the target financial source of truth, not yet provisioned or integrated. Redis is auxiliary only; JSON is legacy/import or fixture only. No fallback financial writes. Measure queries, connections, storage and cache hits; bounded batches for noncritical telemetry, indexes and retention. Never discard evidence required to reproduce decisions. No raw chain-of-thought storage. Critical writes must be durable before acknowledgment; fail closed on unavailable persistence.
 
 ## UI
 Command Center for portfolio, risk, approvals, costs and audit. Modern isometric 3D Office View, names, roles, departments and real event-driven activity. React Three Fiber/Three.js candidates; lazy-load and provide accessible lightweight fallback. No fabricated activity. Separate rendering from trading processes.
 
 ## Open decisions
-Equities provider, initial capital/currency and universe, persistence migration, deployment and concrete resource limits require validation. No infrastructure or API purchases authorized by this document.
+Equities provider, instrument universe, precision policy, database driver/ORM, persistence migration, deployment and concrete resource limits require validation. No infrastructure or API purchases authorized by this document.
 
 ## Engineering boundaries and operational finance
 Keep React presentation, layouts, reusable components, feature hooks, API services, state and domain rules separate. Office and Command Center share domain contracts and services. Use pragmatic TypeScript with runtime validation at trust boundaries; avoid unnecessary abstractions and duplicated logic.
@@ -30,3 +30,8 @@ Initial paper capital EUR 100, monthly OpenAI budget EUR 5. Track realized net t
 Use deterministic scanning, technical analysis, portfolio, risk, execution and auditing. CEO, Research and Strategy may call LLMs on demand with shared cached evidence, bounded context, deduplication and centralized budget reservation. Proposed allocation: Research EUR 2, Strategy EUR 1.50, CEO EUR 0.50, reserve EUR 1; adjustable within approved total. Account for currency conversion and uncertain usage conservatively. Suspend LLM calls when budget is exhausted; deterministic safety remains active.
 
 Clara independently verifies versioned strategy proposals against reproducible historical and out-of-sample evidence, fees, slippage, benchmarks, drawdown and overfitting checks. Learning means statistical evaluation and proposals, not automatic model training or self-modification. Owner approval required before promotion.
+
+## Approved revision after independent review
+Use a modular TypeScript architecture with existing API and worker entrypoints, six deterministic services and three on-demand LLM roles through a shared gateway. Preserve nine named roles in UI, backed by real events. Crypto implementation precedes equities; both remain in scope. PostgreSQL transactions must bind immutable decisions, risk revision, orders, positions, append-only ledger and durable event outbox. Use NUMERIC and exact decimal arithmetic, explicit currency/asset precision and rounding. Derive balances from ledger or reconciled projections. No external API call inside a financial transaction.
+
+Backtest and paper execution share strategy/risk logic with injected clock and data source. Compare net results against buy-and-hold, equal-weight and seeded random baselines with realistic fees, spread, slippage, liquidity and minimum orders. Prevent lookahead and survivorship bias; use walk-forward and untouched final evaluation, log all trials. No forced trade count or profit target. Clara verifies evidence; owner approves promotion. Dependency audit and tested kill switch precede agent expansion.
