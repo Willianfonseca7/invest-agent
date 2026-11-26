@@ -1,0 +1,39 @@
+name: Dependency Audit
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - name: Audit locked dependencies
+        shell: bash
+        run: |
+          set +e
+          npm audit --json > audit-all.json
+          all_status=$?
+          npm audit --omit=dev --json > audit-production.json
+          prod_status=$?
+          set -e
+          node -e 'for (const f of ["audit-all.json","audit-production.json"]) { const a=JSON.parse(require("fs").readFileSync(f,"utf8")); if(a.error || !a.metadata?.vulnerabilities) throw new Error("Audit unavailable: "+f); console.log(f, JSON.stringify(a.metadata.vulnerabilities)); }'
+          echo "Audit exit codes: all=$all_status production=$prod_status"
+          echo "Baseline reporting only; remediation gate follows triage."
+      - name: Upload audit evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dependency-audit
+          path: audit-*.json
+          retention-days: 7
