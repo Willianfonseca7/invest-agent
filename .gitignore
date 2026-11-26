@@ -13,3 +13,8 @@ pnpm-debug.log*
 .env.*
 !.env.example
 data/history.json
+
+# Private project skills (see docs/engineering-skills.md)
+/.agents/skills/context-optimizer/
+/.agents/skills/technical-planner/
+/.agents/skills/typescript-expert/
