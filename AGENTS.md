@@ -14,6 +14,6 @@ Use [docs/business-rules.md](docs/business-rules.md) as the normative source for
 
 ## Engineering workflow
 
-Follow [docs/engineering-workflow.md](docs/engineering-workflow.md) for the three engineering agents, independent QA and quality review, CI and owner approval. Use Clean Code, DRY, KISS, YAGNI, separation of concerns, a single source of truth, least privilege and security by design. Prefer small, justified changes, reuse and risk-proportionate tests. Agents may not change their own rules or expand their permissions.
+Follow [docs/engineering-workflow.md](docs/engineering-workflow.md) for roles, scoped permissions, risk-based testing, independent QA, CI and Product Owner approval. Codex implements directly by default. Delegate to Frontend or Backend only when specialization adds measurable value. Avoid recursive delegation and overlapping assignments.
 
-Frontend develops the interface and UX, Backend develops APIs, engines, persistence and business rules, and QA independently validates implementations. These development roles are separate from the nine product financial roles. Their costs are outside the product AI budget.
+Use Clean Code, DRY, KISS, YAGNI, separation of concerns, a single source of truth, reusable components, pragmatic TypeScript, least privilege and Security by Design. Keep changes small, limit context and report actual checks. The engineering team and its costs remain separate from the product's financial agents and AI budget.

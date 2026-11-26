@@ -1,65 +1,58 @@
 # Engineering workflow
 
-The external ChatGPT Tech Lead owns planning, architecture, technical decisions and acceptance criteria. The local Codex coordinator assigns and routes work, records evidence and controls stage transitions. Frontend and Backend implement. QA independently tests the candidate and reviews the exact diff. The Product Owner keeps final authority over strategic decisions and merges. These three engineering roles operate separately from the product's nine financial roles. [AGENTS.md](../AGENTS.md) governs all stages.
+[AGENTS.md](../AGENTS.md) governs all stages. The Product Owner has final authority over scope, risk acceptance and merges. ChatGPT is the Tech Lead. Codex is the primary Fullstack Developer and coordinator. Frontend and Backend are optional implementation specialists. QA provides independent validation proportionate to risk. These engineering roles operate outside the product's financial agents and AI budget.
 
-## Stage order
+## Responsibilities and permissions
 
-Tech Lead → Frontend and/or Backend → QA → CI → Product Owner → authorized merge.
+| Role | Allowed actions and responsibilities | Restrictions |
+|---|---|---|
+| Product Owner | Approve strategic decisions, protected operations and merges on the verified revision. | Approval must match the action and scope. |
+| ChatGPT · Tech Lead | Prepare architecture, acceptance criteria and risk decisions for the Product Owner. Resolve blockers and scope ambiguity. | Planning advice grants no operational access or approval. |
+| Codex · Fullstack Developer and coordinator | Implement authorized changes across the stack, run affected checks, coordinate non-overlapping assignments and record evidence. Commit, push or open a PR when authorized and pre-PR verification is complete. | Cannot independently approve its own implementation, merge without explicit owner authorization, deploy or broaden access unilaterally. |
+| Frontend · specialist | Implement and test assigned UI, accessibility, i18n and client contracts. Use isolated browser verification when authorized. | No independent backend or shared-contract changes, database access, approval, delegation or release actions. |
+| Backend · specialist | Implement and test assigned APIs, domain, Worker, persistence and security with isolated fixtures. | No independent frontend or shared-contract changes, production data access, approval, delegation or release actions. |
+| QA · independent validator | Review the exact candidate, run authorized checks and report findings and verdict. Edit only explicitly authorized test files when required. | No production implementation edits, recursive delegation or release actions. If QA adds tests, verify the resulting snapshot before issuing a verdict. |
 
-The coordinator starts with the task ID, base SHA, approved scope, acceptance criteria, required checks and constraints. Invoke only relevant agents. If both implementers are needed, assign non-overlapping files or coordinate shared contracts sequentially. Keep handoffs compact and route them through the coordinating session, which starts agents, sends follow-ups and collects results. Use native coordination and record state in the task thread or PR. Keep the workflow manual if the client cannot delegate natively.
+Use least privilege. Sandbox, approval mode, writable paths and connector scopes are enforced by their respective runtimes. The TOML instructions define behavioral boundaries. They do not grant permissions or enforce test-only writes. Prefer read-only QA when no test edits are needed. When tests need writes, use an isolated candidate and disposable outputs. No agent may modify its own rules, grant itself access or request expansion outside the approved scope. Codex alone coordinates assignment and handoffs. No recursive delegation or overlapping write assignments.
 
-CI can run automatically earlier. The coordinator records `CI_VALIDATED` only after QA passes and required CI checks are verified for the same revision. The coordinator sends that evidence directly to the Product Owner. Only an authorized human merge can record `MERGED`.
+## Delivery path
 
-## States and transitions
+Tech Lead and Product Owner define the task → Codex implements directly by default → independent QA when required → authorized PR publication → required CI → Product Owner decision → authorized merge.
 
-| State | Permitted next state and condition |
-|---|---|
-| `PLANNED` | `IN_PROGRESS` after the Tech Lead defines scope and criteria. |
-| `IN_PROGRESS` | `READY_FOR_QA` when the implementer submits a candidate and evidence. |
-| `READY_FOR_QA` | `QA_IN_PROGRESS` when independent QA starts verification. |
-| `QA_IN_PROGRESS` | `QA_FAILED` if required criteria fail, or `QA_PASSED` with evidence for the final tested revision. |
-| `QA_FAILED` | `IN_PROGRESS` for a correction within the shared limit. |
-| `QA_PASSED` | `CI_VALIDATED` once required CI checks pass on the QA-approved revision. If a fix is needed, return to `IN_PROGRESS`. |
-| `CI_VALIDATED` | `AWAITING_OWNER` when the coordinator submits the QA and CI evidence for that revision. |
-| `AWAITING_OWNER` | `MERGED` after explicit owner approval and verification of the final SHA and checks. Return to `IN_PROGRESS` if changes are requested. |
-| `MERGED` | Terminal. Further work starts a new task. |
-| `BLOCKED` | Resume only with a recorded Tech Lead decision. Return to `IN_PROGRESS` for changes or repeat the blocked verification on the same snapshot. Any revised candidate starts again at QA. |
+Delegate only when a specialist has a concrete advantage, such as domain expertise or access to a relevant verification tool. Record the expected benefit and assign a distinct scope, criteria and output. Codex retains responsibility for integration. Use only the files, approved tools and [project-scoped skills](engineering-skills.md) needed for the assignment.
 
-Any active stage can enter `BLOCKED` if required evidence, permission or verification is unavailable, or if a blocker remains after the correction limit. Escalate to the Tech Lead with the current revision, evidence, remaining blockers and options. Neither a blocked check nor an exhausted limit constitutes approval.
+Complete affected local checks and the applicable QA gate before publishing the PR. Verify required remote CI and obtain Product Owner approval before merging. Plan the task with a base SHA, criteria, risk and affected checks. Keep a single handoff containing candidate revision, changed paths, relevant decisions, actual commands and results, unrun checks and blockers. Link existing evidence instead of repeating analysis. Avoid invoking an agent again unless a changed candidate or new evidence warrants it.
 
-## Corrections and evidence
+## Risk-based testing and test impact analysis
 
-- **QA failure:** Record reproducible findings and route them to the responsible implementer. QA rechecks previous findings and all affected changes and forwards passing candidates directly to CI.
-- **CI failure:** Route the cause to its owner. If the fix changes candidate content, return to the implementer and then QA before accepting CI again. A transient rerun on the same revision can reuse current QA evidence.
-- **Limit:** At most three correction rounds per task across QA and CI. Count a round when the coordinator returns a failed candidate for correction. If blocking defects persist after the third corrected candidate, enter `BLOCKED`, report remaining findings, and await a decision from the Tech Lead.
-- **Revision binding:** Record the exact base and candidate SHA or a reproducible fingerprint of the authorized diff and untracked candidate files. QA evidence includes any QA test changes. Changing candidate content invalidates prior approvals, including CI and owner approval, even if HEAD stays the same. Before merge, compare the PR head SHA, reviewed content and required check results. Use a fresh candidate if evidence cannot be mapped to the exact revision.
+1. Map changed files to consumers, contracts, tests and mandatory checks. Include indirect impact on safety, persistence, permissions or shared types. When impact cannot be bounded, broaden verification.
+2. During implementation run the affected tests and relevant lint, typecheck or build. Cover failure, recovery and boundaries in proportion to risk. Keep required safety checks in force.
+3. Reuse evidence only when the tested behavior, dependencies, inputs, environment and verification criteria remain valid. Record the evidence source and what changed. A changed candidate invalidates its approvals even if some test evidence remains reusable. Required CI and approvals must match the final candidate.
+4. Independent QA is mandatory for critical financial or security changes, when the task explicitly requires it, or when the governing workflow requires it. For other work, record the risk assessment and why independent QA is or is not needed. When required QA is unavailable, mark the task BLOCKED.
+5. Identify redundant checks by test coverage and failure signals, not command count alone. Propose consolidation separately. Preserve mandatory safety checks and never weaken assertions or coverage to pass.
 
-## Handoffs
-
-| Reporter | Required fields |
-|---|---|
-| Implementer | Task ID, objective, files changed, technical decisions, tests and real results, limitations, known risks and candidate revision. |
-| QA | `PASSED`, `FAILED` or `BLOCKED`, tested revision, criteria, commands, results and unrun checks. For each finding include ID, severity, file and line, evidence, impact, required fix, expected verification and correction owner. |
-
-## QA quality gate
-
-Inspect the diff and derive checks independently of the implementer. Check AGENTS.md compliance, business rules, acceptance criteria, scope, architecture, security, financial integrity, contracts and typing, test quality, regressions, relevant duplication and unnecessary dependencies. Include performance and accessibility when relevant. Scale the review and tests to the risk. The QA agent can consult `code-review` on demand within this gate.
+QA checks scope, correctness, business rules, security, financial integrity, architecture, contracts, test quality and regressions. Include accessibility and performance where relevant. Report severity, file and line, evidence, impact and required verification for each finding.
 
 | Severity | Gate |
 |---|---|
-| P0 — Critical | Immediate block for severe security, financial risk, data loss, secret exposure or real execution. |
-| P1 — High | Required fix for significant bugs, regressions, concurrency errors or material architecture violations. |
-| P2 — Medium | Fix genuine defects, material duplication, inadequate tests or maintainability issues with demonstrated impact. |
-| P3 — Low | Optional refinement. Does not block by itself. |
+| P0 · Critical | Block severe security, financial risk, data loss, secret exposure or real execution. |
+| P1 · High | Require fixes for significant bugs, regressions, concurrency errors or material architecture violations. |
+| P2 · Medium | Require fixes for demonstrated defects, inadequate tests or material maintainability problems. |
+| P3 · Low | Optional refinement. |
 
-## Permissions, skills and cost
+## Evidence and correction limits
 
-Agents inherit the coordinating session's sandbox and approvals. Profile instructions define behavioral scope. QA may edit authorized tests only. The profiles do not technically enforce test-only writes. For a check requiring write isolation, use a separate read-only QA session and return its evidence to the coordinator. Any authorized test edits occur separately and require revalidation of the resulting snapshot. Review external connector permissions separately. Agents cannot modify their own rules or grant themselves additional permissions.
+| State | Transition |
+|---|---|
+| PLANNED → IN_PROGRESS | Scope, risk and acceptance criteria are recorded. |
+| IN_PROGRESS → READY_FOR_QA → QA_IN_PROGRESS | Required independent QA receives the candidate and its evidence. |
+| QA_IN_PROGRESS → QA_PASSED or QA_FAILED | QA reports a verdict for the exact revision. |
+| QA_PASSED or recorded QA_NOT_REQUIRED → CI_VALIDATED | All required checks pass on that revision. Early CI success can be recorded here once the QA gate is satisfied. |
+| CI_VALIDATED → AWAITING_OWNER → MERGED | Codex presents evidence. Merge requires explicit Product Owner authorization and verification of the final SHA and required checks. |
+| Any active state → BLOCKED | Required evidence, permission or validation is unavailable, or blocking defects remain after the correction limit. Escalate to Tech Lead and await a recorded decision before resuming. |
 
-Read relevant vetted skills on demand and use existing deterministic tools for verification. The product's EUR 5 application budget is separate from development usage. Avoid unbounded retries and paid external API calls.
+QA or CI failures return to the responsible implementer with evidence. A changed candidate returns through its applicable QA gate and required CI. A transient CI rerun on the same revision can reuse valid QA evidence. Count each returned correction across QA and CI toward the shared limit of **three**. If a blocking finding persists after the third corrected candidate, stop with BLOCKED. Changes to candidate content invalidate earlier QA, CI and owner approval, even if HEAD stays the same.
 
-For future global installation, use one private versioned copy of [personal-ai-skills.](https://github.com/Willianfonseca7/personal-ai-skills.), with individually approved links in `~/.agents/skills/` and `~/.claude/skills/`. Review candidate revisions and their auxiliary files before updating links. Preserve existing entries, confirm discovery in fresh sessions and keep the prior revision for rollback. Draft skills remain available by direct reading only until the owner approves installation and their evidence is reviewed.
+## Runtime safety
 
-## Critical technical backlog
-
-- **P0 — Stale local API/Worker bundles.** Existing ignored `dist/` bundles were found with the old exchange order path and without the current live-order block. Keep them out of execution. Before a separately approved start or deployment, rebuild from verified source and confirm the resulting artifacts and actual running revision enforce the paper-only boundary. This workflow adds no release or deployment authorization.
+Existing ignored `dist/` bundles may predate the live-order block. Keep them out of execution. Before an authorized start or deployment, rebuild from verified source and verify the actual artifact and running revision. This workflow grants no startup or deployment authorization.
