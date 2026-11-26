@@ -7,12 +7,7 @@ operationsRouter.get("/operations", async (_req, res) => {
   try {
     const snapshot = await getOperationsSnapshot();
     res.json(snapshot);
-  } catch (error) {
-    res.status(500).json({
-      error:
-        error instanceof Error
-          ? error.message
-          : "Erro ao obter snapshot operacional"
-    });
+  } catch {
+    res.status(503).json({ error: "Operational state unavailable" });
   }
 });

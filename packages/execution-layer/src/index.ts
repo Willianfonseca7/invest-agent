@@ -9,6 +9,7 @@ import type {
 import {
   appendTradeLedgerItem,
   getOpenPosition,
+  readTradeLedger,
   removeOpenPosition,
   saveOpenPosition
 } from "@invest-agent/utils";
@@ -82,6 +83,8 @@ export class ExecutionLayer {
   }
 
   private async executePaper(intent: ExecutionOrderIntent): Promise<ExecutionResult> {
+    // Both financial stores must be known before any paper state transition.
+    await readTradeLedger();
     const openPosition = await getOpenPosition(intent.symbol);
     const executedAt = Date.now();
     const trigger = intent.trigger ?? null;

@@ -5,3 +5,4 @@ export * from "./position-store";
 export * from "./risk-decision-store";
 export * from "./trade-ledger-store";
 export * from "./worker-runtime-store";
+export * from "./financial-state";

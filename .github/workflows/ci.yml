@@ -51,5 +51,7 @@ jobs:
       - run: npm ci
       - name: Restore missing Linux native bindings
         run: npm install --no-save --package-lock=false --ignore-scripts @rollup/rollup-linux-x64-gnu@4.62.2 @rolldown/binding-linux-x64-gnu@1.0.0-rc.15
+      - run: node scripts/safe-artifact.test.cjs
+      - run: npx --no-install vitest run --config vitest.config.ts packages/utils/src/__tests__/financial-state.test.ts
       - run: npm --workspace packages/execution-layer run test
       - run: npx --no-install vitest run --config vitest.config.ts apps/worker/src/__tests__/cycle.test.ts

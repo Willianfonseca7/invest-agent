@@ -4,7 +4,8 @@ import {
   getOpenPosition,
   removeOpenPosition,
   saveOpenPosition,
-  appendTradeLedgerItem
+  appendTradeLedgerItem,
+  readTradeLedger
 } from "@invest-agent/utils";
 import { ExecutionLayer } from "../index";
 
@@ -12,7 +13,8 @@ vi.mock("@invest-agent/utils", () => ({
   saveOpenPosition: vi.fn(),
   removeOpenPosition: vi.fn(),
   getOpenPosition: vi.fn(),
-  appendTradeLedgerItem: vi.fn()
+  appendTradeLedgerItem: vi.fn(),
+  readTradeLedger: vi.fn().mockResolvedValue([])
 }));
 
 describe("ExecutionLayer", () => {
@@ -132,6 +134,18 @@ describe("ExecutionLayer", () => {
     await expect(layer.execute(intent)).rejects.toThrow("ledger unavailable");
     await expect(layer.execute(intent)).rejects.toThrow("pending or uncertain");
     expect(saveOpenPosition).toHaveBeenCalledTimes(1);
+  });
+  it("blocks both paper sides when ledger state is uncertain", async () => {
+    const exchange = { getTicker: vi.fn(), createMarketBuy: vi.fn(), createMarketSell: vi.fn() };
+    vi.mocked(readTradeLedger).mockRejectedValue(new Error("secret storage detail"));
+    const layer = new ExecutionLayer(exchange, "test");
+    await expect(layer.execute({ symbol: "UNCERTAINUSDT", side: "BUY", quoteOrderQty: 100 })).rejects.toThrow();
+    await expect(layer.execute({ symbol: "UNCERTAINUSDT", side: "SELL", quantity: 1 })).rejects.toThrow();
+    expect(exchange.getTicker).not.toHaveBeenCalled();
+    expect(getOpenPosition).not.toHaveBeenCalled();
+    expect(saveOpenPosition).not.toHaveBeenCalled();
+    expect(removeOpenPosition).not.toHaveBeenCalled();
+    expect(appendTradeLedgerItem).not.toHaveBeenCalled();
   });
   it.each(["live", "simulation"] as const)("blocks %s before side effects", async (mode) => {
     const exchange = { getTicker: vi.fn(), createMarketBuy: vi.fn(), createMarketSell: vi.fn() };
