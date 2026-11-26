@@ -7,19 +7,19 @@ Positions are a Redis JSON value or positions.json; the ledger is a Redis list o
 
 ## Required transaction contract
 - Stable intent ID derived from immutable decision identity, not generated on retry. Include createdAt, expiresAt, expected position orderId (SELL), expected portfolio revision, and strategy version.
-- Reject expired, conflicting or stale intents; replay of a committed identical intent returns the recorded result without changing state.
+- Reject expired uncommitted, conflicting or stale intents; lookup of a committed identical intent returns the recorded result without changing state.
 - Atomically validate revision and position identity, commit position transition, append ledger, record intent result, and update cumulative realized PnL. Revalidate portfolio risk against the same revision; a conflict requires a fresh decision.
-- Redis implementation: one Lua script, with all keys in the same hash slot where required. No external network call inside the transaction. Obtain paper quote before commit; reject stale quote. No expiring lock is relied upon for correctness.
-- Local implementation: single durable state file with exclusive interprocess coordination and atomic replacement; fail closed on corrupt or unreadable state. Until implemented and tested, local multi-process execution must not be enabled.
+- PostgreSQL implementation: one transaction with unique intent identity, portfolio revision and row locking or equivalent serializable concurrency control; atomically persist order, position, append-only ledger, receipt and outbox. Obtain quote before transaction and reject stale quote. No external network call inside transaction.
+- PostgreSQL is the sole target financial source of truth. Redis and JSON are not fallback financial writers. Use exact decimal arithmetic and NUMERIC with explicit currency/asset precision; derive totals from ledger or reconciled projections. Legacy writers must be stopped before cutover.
 - Preserve cumulative financial totals independently of bounded recent-history display. Never silently reconstruct lifetime PnL from a truncated ledger.
 - Existing state migration must be explicit, versioned, validated and reversible; do not reset or overwrite existing financial state. If historical totals cannot be recovered, stop and request owner reconciliation.
-- Retain intent records at least through their validity window plus clock-skew allowance; expired intents must remain rejected even after record pruning. Monitor storage and request consumption.
+- Retain durable unique intent identities and receipts with financial audit evidence; reject expired uncommitted intents and conflicting replays. Define receipt lookup separately from new execution. Monitor storage and request consumption.
 
 ## Delivery gates
 1. Define typed intent and transaction interface; test stale position and expiry.
-2. Implement Redis atomic commit and local durable adapter; test actual storage concurrency and restart behavior, not mocks alone.
+2. Design schema and implement PostgreSQL atomic commit; test actual database concurrency and restart behavior, not mocks alone.
 3. Integrate worker risk revision and execution; migrate readers and reconcile legacy ledger.
-4. Verify duplicate replay, competing workers on same and different symbols, stale revisions, expiry, restart, ambiguous response after commit, unavailable storage, corrupted local file and migration rollback.
+4. Verify duplicate replay, competing workers on same and different symbols, stale revisions, expiry, restart, ambiguous response after commit, unavailable database, corrupt legacy import and migration rollback.
 5. Owner reviews migration and deployment separately. Live trading remains prohibited.
 
 No paid services or new infrastructure authorized. No deployment or migration in this design PR.
