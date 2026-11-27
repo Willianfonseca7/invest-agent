@@ -29,6 +29,12 @@ Before moving a task from `PLANNED` to `IN_PROGRESS`, Codex maps it to the relev
 
 Open decisions and unavailable or stale evidence block any task that depends on them. Record `BLOCKED` with the unmet prerequisite and escalate to Tech Lead. A separately scoped design, investigation or security remediation task may proceed through its own gate. Recheck affected prerequisites when the candidate, environment or approval changes, and bind the evidence to the relevant handoff. This planning gate grants no operational authority.
 
+## Architecture and performance decisions
+
+Preserve existing contracts and stack when suitable. Keep modular boundaries, reuse established engines, components and services, and follow the engineering principles in AGENTS.md. Record decisions in language the Product Owner can maintain. For new technology, provide the problem, alternatives, expected benefit, effort, learning curve, cost and maintenance impact. Identify candidates with high value and low effort. Adoption requires explicit Product Owner approval.
+
+For relevant tasks, record the workload and baseline before proposing targets or performance claims. Use proportionate impact tests, typed events, bounded concurrency and valid evidence reuse. Separate deterministic and LLM observations. Performance work keeps the financial and security gates intact. Apply the [roadmap performance plan](roadmap.md#performance-by-design) when defining acceptance criteria.
+
 ## Risk-based testing and test impact analysis
 
 1. Map changed files to consumers, contracts, tests and mandatory checks. Include indirect impact on safety, persistence, permissions or shared types. When impact cannot be bounded, broaden verification.

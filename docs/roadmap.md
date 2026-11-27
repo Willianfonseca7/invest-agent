@@ -33,6 +33,23 @@ Stage numbers are stable references in this plan. An entry gate requires evidenc
 | **17. Office View.** Render real product activity in a 3D workspace. | Requires 14 and 16. Enter with shared typed read contracts and meaningful committed role events. | Deliver a lazy-loaded, accessible view with a lightweight fallback. Complete when browser performance is measured and every activity shown can be traced to a real event. Identified fixtures may be used in tests. | Rendering stack and resource budgets remain open. | Codex integrates. Frontend may own rendering. QA validates accessibility, fidelity and performance. |
 | **18. Prolonged Paper Validation.** Establish operational evidence across market regimes. | Requires 13, 14, 16 and 17 for the full product validation. Requires 15 for any equities claims. | Exercise multi-regime paper operation, reconciliation, recovery drills, load and security checks. Complete with reviewable evidence and a Product Owner decision on the verified scope. | Paper evidence grants no real-trading authorization. Costs and runtime limits remain subject to approval. | Codex coordinates. Specialists address scoped issues. QA independently verifies results. |
 
+## Architecture, innovation and maintainability
+
+Use the simplest design that meets the product goals and safety requirements. Preserve the current stack where it meets them. Reuse engines, components, services and contracts. Prefer a modular architecture and keep clear ownership of data and policy. Add distributed infrastructure only when a measured constraint warrants it.
+
+Use KISS, YAGNI, DRY, separation of concerns, single sources of truth and Clean Code to make advanced features easier to deliver and maintain. Keep architectural decisions understandable to the Product Owner. Record the context, decision, consequence, validation and rollback in plain language. Explain new concepts where they are introduced and keep abstractions proportional to their actual use.
+
+A technology proposal must identify the problem, alternatives (including reuse of the existing stack), expected measurable benefit, implementation effort, learning curve, cost and maintenance impact. Identify high-value, low-effort opportunities first. Treat reuse of committed projections, duplicate-request elimination and isolated lazy loading as candidates to evaluate when their prerequisites exist. The Product Owner approves adoption. An expected benefit remains a hypothesis until measured.
+
+## Performance by Design
+
+- Use typed events for product-agent communication and share valid data and results across consumers. Use bounded parallelism for independent tasks. Serialize operations that have functional or financial dependencies, including state transitions and financial commits.
+- Consider bounded caches, deduplication and concurrency controls before adding infrastructure. Key reused results by relevant identity, revision and freshness. Reduce external calls and redundant queries. Validate required authoritative state at the write boundary even when cached data is available.
+- Establish a baseline before setting quantitative goals. Record the revision, workload, environment, sample size and method. Measure latency, throughput, memory, CPU, database activity, queue behavior, errors and costs where applicable. Report p50, p95 and p99 only with sufficient observations for the percentile. Keep deterministic processing and LLM requests distinct in latency, resource and cost measurements.
+- Run performance tests in proportion to the expected impact. Measure relevant baselines in isolated integration (8), agent and event processing (14), user-facing projections and views (16–17), and prolonged validation (18). Never trade atomicity, financial integrity, authorization, the Risk Engine or the Kill Switch for speed.
+
+The product evolves through real financial-agent responsibilities and event-driven orchestration, reproducible backtesting, evidence-based learning, the Command Center and interactive 3D Office View, operational and financial observability, and AI cost controls. Their milestones and prerequisites remain in the dependency graph.
+
 ## Why the critical order changed
 
 The current [execution safety contract](execution-safety.md) describes separate legacy writes and a process-local guard. Reading a kill-switch state before a separate position or ledger write leaves a cross-process race. The state check, financial transition and audit evidence need a shared serialization boundary. Separating schema and primitives (5), disabled integration (8), reconciliation evidence (9), and operator control (10) avoids requiring live writers or a later migration to verify the gate.
