@@ -54,4 +54,5 @@ jobs:
       - run: node scripts/safe-artifact.test.cjs
       - run: npx --no-install vitest run --config vitest.config.ts packages/utils/src/__tests__/financial-state.test.ts
       - run: npm --workspace packages/execution-layer run test
+      - run: npm --workspace packages/monetary run test
       - run: npx --no-install vitest run --config vitest.config.ts apps/worker/src/__tests__/cycle.test.ts
