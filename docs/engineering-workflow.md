@@ -23,6 +23,12 @@ Delegate only when a specialist has a concrete advantage, such as domain experti
 
 Complete affected local checks and the applicable QA gate before publishing the PR. Verify required remote CI and obtain Product Owner approval before merging. Plan the task with a base SHA, criteria, risk and affected checks. Keep a single handoff containing candidate revision, changed paths, relevant decisions, actual commands and results, unrun checks and blockers. Link existing evidence instead of repeating analysis. Avoid invoking an agent again unless a changed candidate or new evidence warrants it.
 
+## Dependency Gate
+
+Before moving a task from `PLANNED` to `IN_PROGRESS`, Codex maps it to the relevant [roadmap stages](roadmap.md) and records each critical prerequisite, its status, the exact revision or environment where it was verified, evidence and an owner for any gap. Tech Lead resolves ambiguous or cyclic dependencies. Check in particular data contracts, authentication and approvals, financial integrity, concurrent write safety, and the separation of implementation, integration, migration and activation when applicable.
+
+Open decisions and unavailable or stale evidence block any task that depends on them. Record `BLOCKED` with the unmet prerequisite and escalate to Tech Lead. A separately scoped design, investigation or security remediation task may proceed through its own gate. Recheck affected prerequisites when the candidate, environment or approval changes, and bind the evidence to the relevant handoff. This planning gate grants no operational authority.
+
 ## Risk-based testing and test impact analysis
 
 1. Map changed files to consumers, contracts, tests and mandatory checks. Include indirect impact on safety, persistence, permissions or shared types. When impact cannot be bounded, broaden verification.
@@ -44,7 +50,7 @@ QA checks scope, correctness, business rules, security, financial integrity, arc
 
 | State | Transition |
 |---|---|
-| PLANNED → IN_PROGRESS | Scope, risk and acceptance criteria are recorded. |
+| PLANNED → IN_PROGRESS | Scope, risk and acceptance criteria are recorded and the Dependency Gate passes. |
 | IN_PROGRESS → READY_FOR_QA → QA_IN_PROGRESS | Required independent QA receives the candidate and its evidence. |
 | QA_IN_PROGRESS → QA_PASSED or QA_FAILED | QA reports a verdict for the exact revision. |
 | QA_PASSED or recorded QA_NOT_REQUIRED → CI_VALIDATED | All required checks pass on that revision. Early CI success can be recorded here once the QA gate is satisfied. |
