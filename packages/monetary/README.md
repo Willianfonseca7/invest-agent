@@ -1,8 +1,10 @@
 # Monetary precision foundation (Roadmap Stage 4)
 
-This isolated backend workspace implements the BR-CAP-001 EUR 100 **virtual opening balance contract** and BR-PST-001 exact arithmetic boundaries. It creates no portfolio, funding transaction, posting, or database schema. It does not integrate with the existing number-based shared types or engines, which still round with `toFixed(2/8)`. No legacy balance or order path uses this package.
+This isolated backend workspace implements the BR-CAP-001 **configurable initial capital validation contract** and BR-PST-001 exact arithmetic boundaries. It creates no portfolio, funding transaction, posting, or database schema. It does not integrate with the existing number-based shared types or engines, which still round with `toFixed(2/8)`. No legacy balance or order path uses this package.
 
 ## Contract and limits
+
+`validateInitialCapital(amount)` validates an explicit positive decimal string as EUR initial capital for one new paper portfolio. Examples include `"50"`, `"100"`, `"200"` and `"300"`. The function applies no default, rounding or business maximum. It uses the same technical decimal envelope as other monetary inputs. The Product Owner must explicitly select the amount. Authorization and persistence are integration requirements. Available balance will be derived from accounting records, and additional contributions will require Product Owner authorization and auditable records.
 
 Inputs and outputs are canonical finite plain decimal strings. JavaScript numbers, exponents, whitespace, signed plus, and invalid values are rejected. Codes are uppercase and USD and USDT remain distinct. Amounts, prices, quantities, quantity increments, unit costs, and FX rates have separate constructors. Money carries currency; prices and unit costs carry base and quote asset codes. Addition and subtraction require identical currencies. Price × quantity requires the base asset to match. Currency conversion requires a supplied directional positive rate, nonempty source, UTC observation and validity timestamps, and a caller supplied UTC evaluation time. Missing, reversed, future or expired FX fails. There is no implicit provider, parity, inverse rate or accounting scale.
 
@@ -16,11 +18,11 @@ The technical resource envelope admits up to 80 coefficient digits, 80 integer d
 
 `decimal.js-light` 2.5.1 is MIT and already appears transitively in the lockfile. Its documented arithmetic truncates at configured precision. Full `decimal.js` 10.6.0 is MIT, has no dependencies, supports a private clone and explicit `ROUND_HALF_EVEN`, and declares no Node engine restriction. The isolated install and tests passed on local Node 24; CI Node 22 verification remains pending. It adds one direct runtime package. No paid service is involved. Removal is limited to this workspace and its lock entries because no consumer is wired.
 
-**BLOCKED for integration:** Product Owner decisions are still needed for FX source and conversion rules, approved instrument precisions and increments, accounting scale per currency, execution cost assumptions, and legacy balance reconciliation. Stage 5 PostgreSQL and later execution integration have separate gates. The EUR 100 constant is a contract for a fresh paper portfolio only; restart and idempotent posting behavior remain dependent on the future ledger.
+**BLOCKED for integration:** Product Owner decisions are still needed for FX source and conversion rules, approved instrument precisions and increments, accounting scale per currency, execution cost assumptions, and legacy balance reconciliation. Stage 5 PostgreSQL and later execution integration have separate gates. Portfolio creation, idempotent opening records, authorization and ledger-derived balances remain dependent on future integration. Any additional business limits require Product Owner approval.
 
 ## Local performance baseline
 
-Recorded on 2026-11-27 with Node 24.18.0, npm 11.16.0, macOS 15.6.1 arm64, using `performance.now()` in an isolated temporary copy with `decimal.js` 10.6.0. Candidate `src/index.ts` SHA-256: `6eb6d1f38882813af6e3eaafc0e7fdbbc3e5873cdb9be8b3ac47ba1e29031eb6`. Each workload used prebuilt inputs, 1,000 warmup iterations and 10,000 measured iterations in one process:
+Recorded on 2026-11-27 with Node 24.18.0, npm 11.16.0, macOS 15.6.1 arm64, using `performance.now()` in an isolated temporary copy with `decimal.js` 10.6.0. Measured `src/index.ts` revision before the initial capital policy adjustment, SHA-256: `6eb6d1f38882813af6e3eaafc0e7fdbbc3e5873cdb9be8b3ac47ba1e29031eb6`. Each workload used prebuilt inputs, 1,000 warmup iterations and 10,000 measured iterations in one process:
 
 | Workload | Total | Mean per operation |
 |---|---:|---:|

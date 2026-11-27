@@ -1,11 +1,21 @@
 import { describe, expect, it } from "vitest";
-import { add, convertFx, currency, floorBuy, fxRate, increment, money, multiply, nonNegativeMoney, PAPER_OPENING_BALANCE, parseDecimal, parseNonNegative, parsePositive, price, priceTick, quantity, roundAccounting, subtract, unitCost } from "../index";
+import { add, convertFx, currency, floorBuy, fxRate, increment, money, multiply, nonNegativeMoney, parseDecimal, parseNonNegative, parsePositive, price, priceTick, quantity, roundAccounting, subtract, unitCost, validateInitialCapital } from "../index";
 
 const eur = (amount: string) => money(amount, "EUR");
 
 describe("exact monetary foundation", () => {
-  it("defines only the virtual EUR opening contract", () => {
-    expect(PAPER_OPENING_BALANCE).toEqual({ amount: "100", currency: "EUR" });
+  it.each(["50", "100", "200", "300", "1000000"])("accepts explicit EUR initial capital of %s", (amount) => {
+    expect(validateInitialCapital(amount)).toEqual({ amount, currency: "EUR" });
+  });
+
+  it("preserves decimal precision and canonicalizes initial capital without rounding", () => {
+    expect(validateInitialCapital("50.12500")).toEqual({ amount: "50.125", currency: "EUR" });
+  });
+
+  it("rejects absent, malformed, nonpositive, and unrepresentable initial capital", () => {
+    for (const amount of [undefined, null, 100, "", "0", "0.00", "-1", "1e2", " 100", "9".repeat(81)]) {
+      expect(() => validateInitialCapital(amount)).toThrow();
+    }
   });
   it("canonicalizes finite plain decimal strings and rejects numeric or unbounded inputs", () => {
     expect(() => parseDecimal("-000")).toThrow();

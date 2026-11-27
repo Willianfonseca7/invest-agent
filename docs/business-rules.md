@@ -7,10 +7,10 @@ This is the normative product behavior reference. The Product Owner approved the
 ## BR-CAP — Capital
 
 ### BR-CAP-001 — Accounting capital
-- **Rule and authority.** Capital is the central product domain. Preserve it and seek risk-adjusted growth within approved policy. EUR is the accounting currency and a new paper portfolio starts with EUR 100 virtual capital. The Product Owner approves additional capital and conversion policy.
-- **Decision source.** Business Rules Foundation decisions 1 and 5.
-- **Invalid state and acceptance.** An unknown currency, missing required conversion or unreconciled balance blocks a dependent operation. A fresh portfolio has one EUR 100 opening balance. Restarting does not add capital. Foreign quotes carry their currency and require approved conversion before affecting EUR totals.
-- **Implementation.** Conflicting legacy behavior. The Worker defaults to 1,000 USDT and derives cash from retained trades. FX source, conversion rules and legacy balances remain open.
+- **Rule and authority.** Capital is the central product domain. Preserve it and seek risk-adjusted growth within approved policy. EUR is the accounting currency. The Product Owner explicitly selects positive decimal initial virtual capital for each new paper portfolio. Apply no default. Any additional business limits require Product Owner approval. Derive available balance from accounting records and prohibit manual balance adjustments. Additional contributions require Product Owner authorization and auditable accounting records. The Product Owner approves conversion policy.
+- **Decision source.** Business Rules Foundation decisions 1 and 5, amended by the Product Owner’s configurable initial capital decision in PR #26.
+- **Invalid state and acceptance.** An unknown currency, missing required conversion or unreconciled balance blocks a dependent operation. Missing, invalid or nonpositive initial capital blocks creation. EUR 50, 100, 200 and 300 are valid examples. A fresh portfolio has one opening record for the amount explicitly approved. Restarting does not add capital. Foreign quotes carry their currency and require approved conversion before affecting EUR totals.
+- **Implementation.** The monetary foundation validates an explicit positive EUR decimal. Portfolio creation, approval enforcement, auditable contributions and accounting-derived balances await persistence and integration. The legacy Worker still defaults to 1,000 USDT and derives cash from retained trades, which conflicts with this rule. FX source, conversion rules and legacy balances remain open.
 
 ## BR-ALL — Allocation
 

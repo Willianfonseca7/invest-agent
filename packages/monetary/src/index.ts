@@ -90,7 +90,9 @@ export function convertFx(value: Money, rate: FxRate | null | undefined, at: unk
   if (now >= checked.validUntil) throw new Error("Stale FX rate");
   return money(output(exact(value.amount).times(exact(checked.amount))), checked.to);
 }
-export const PAPER_OPENING_BALANCE: Money = Object.freeze(nonNegativeMoney("100", "EUR"));
+export function validateInitialCapital(amount: unknown): Money {
+  return { amount: parsePositive(amount), currency: currency("EUR") };
+}
 
 export type BuyQuote = Readonly<{ budget: Money; executionPrice: Price; priceTick: PriceTick; quantityIncrement: QuantityIncrement; fixedCost: Money; costPerUnit: UnitCost }>;
 export type BuySizing = Readonly<{ quantity: Quantity; gross: Money; cost: Money; total: Money; remainder: Money }>;
